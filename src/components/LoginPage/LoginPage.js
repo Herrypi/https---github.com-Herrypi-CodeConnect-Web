@@ -74,7 +74,7 @@ function LoginPage() {
         <Logo>로그인</Logo>
       </Header>
       <InputContainer>
-        <Label htmlFor="email">이메일</Label>
+        <Label htmlFor="email">이메일 입력</Label>
         <Input
           type="email"
           id="email"
