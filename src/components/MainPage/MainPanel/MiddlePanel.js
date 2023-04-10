@@ -10,7 +10,6 @@ function MiddlePanel() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [count, setCount] = useState("");
-  const [role, setRole] = useState("");
   const [field, setField] = useState("");
 
 
@@ -25,7 +24,6 @@ function MiddlePanel() {
       title,
       content,
       count,
-      role,
       field,
       timestamp: Date.now()
     };
@@ -52,21 +50,19 @@ function MiddlePanel() {
         </Posting>
         {showPopup && (
           <Popup>
-            <input type="text" placeholder="Enter a title." onChange={(e) => setTitle(e.target.value)} />
-            <textarea placeholder="Enter your content." onChange={(e) => setContent(e.target.value)}></textarea>
-            <input type="text" placeholder="Enter a count." onChange={(e) => setCount(e.target.value)} />
-            <input type="text" placeholder="Enter a role." onChange={(e) => setRole(e.target.value)} />
-            <input type="text" placeholder="Enter a field." onChange={(e) => setField(e.target.value)} />
+            <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} /><br/>
+            <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)}/><br/>
+            <input type="text" placeholder="총 인원수를 설정하세요요." onChange={(e) => setCount(e.target.value)} /><br/>
+            <input type="text" placeholder="관심분야를 입력하세요." onChange={(e) => setField(e.target.value)} /><br/>
             <button onClick={() => setShowPopup(false)}>Cancel</button>
             <button onClick={() => {
-              if (title && content && count && role && field) {
+              if (title && content && count && field) {
                 // Add logic for creating a new post
                 addPost();
                 setShowPopup(false);
                 setTitle("");
                 setContent("");
                 setCount("");
-                setRole("");
                 setField("");
               } else {
                 alert("Please enter all the fields.");
@@ -78,10 +74,13 @@ function MiddlePanel() {
         <Feed>
           {posts.map((post, index) => (
             <Post key={index}>
-              <h3>{post.title}</h3>
-              <p>{post.content}</p>
-              <small>{new Date(post.timestamp).toLocaleString()}</small>
-            </Post>
+            <h3>{post.title}</h3>
+            <div className="post-content">{post.content}</div>
+            <small>{new Date(post.timestamp).toLocaleString()}</small>
+            <div>Count: {post.count} | Field: {post.field}</div>
+          </Post>
+          
+
           ))}
         </Feed>
       </Container>
@@ -121,13 +120,17 @@ align-items: center;
 padding-top: 20px;
 `;
 
+// display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "fixed", top: 0, bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.5)"
 const Popup = styled.div`
-  position: absolute;
+flexDirection: column;
+alignItems: center;
+justifyContent: center;
+  position: fixed;
   width:700px;
-  height:500px;
+  height:auto;
   top: 50%;
   left: 30%;
-  transform: translate(-50%, -50%);
+  transform: translate(0%, -50%);
   background-color: white;
   padding: 20px;
   border: 1px solid black;
@@ -143,4 +146,22 @@ const Post = styled.div`
   margin: 10px;
   background-color: #F3F8FF;
   border-radius: 10px;
+
+  .post-content {
+    margin-top: 10px;
+    font-size: 16px;
+    white-space: pre-wrap;
+  }
 `;
+
+
+// const Post = styled.div`
+//   border: 1px solid #ddd;
+//   padding: 20px;
+//   width: 500px;
+//   height: auto;
+//   left: 30%
+//   margin: 10px;
+//   background-color: #F3F8FF;
+//   border-radius: 10px;
+// `;
