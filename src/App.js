@@ -10,6 +10,8 @@ import MyPage from './components/MyPage/MyPage';
 import QnAPage from './components/QnAPage/QnAPage';
 import Chatpage from './components/ChatPage/Chatpage';
 
+
+
 function App() {
   return (
     <Router>
