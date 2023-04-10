@@ -35,26 +35,28 @@ function LoginPage() {
     axios
       .post(BASE_URL, formValues)
       .then((response) => {
+        const responseData = response.data;
         if (response.status === 200) {
+          const { token, exprTime, member } = responseData.data;
           // save the token in localStorage
-          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('token', token);
 
           // set Authorization header for all axios requests
-          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
           // dispatch login action to update user state
           
-          console.log(response.data.token);
+          console.log(token);
 
 
-          dispatch(login(response.data));
+          dispatch(login(responseData));
 
           // navigate to home page
           navigate("/");
         }
       })
-      .catch((error) => {
-        setErrors(error.response.data);
+      .catch((errors) => {
+        setErrors(errors.response.data);
       });
 
   };
