@@ -1,6 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { AiOutlinePlusCircle } from 'react-icons/ai'
+import axios from 'axios';
+import { NavLink } from 'react-router-dom';
+
 const { localStorage } = window;
 
 function MiddlePanel() {
@@ -11,6 +14,13 @@ function MiddlePanel() {
   const [content, setContent] = useState("");
   const [count, setCount] = useState("");
   const [field, setField] = useState("");
+
+  const [postIds, setPostIds] = useState([]);//게시물 목록중 recruited_id만 저장
+  // const [postTitle, setPostTitles] = useState([]);
+  // const [postContent, setPostContents] = useState([]);
+  // const [postCount, setPostCounts] = useState([]);
+  // const [postField, setPostFields] = useState([]);
+
 
 
   function handleWheel(event) {
@@ -25,7 +35,6 @@ function MiddlePanel() {
       content,
       count,
       field,
-      timestamp: Date.now()
     };
     fetch('http://112.154.249.74:8080/recruitments/create', {
       method: 'POST',
@@ -37,10 +46,44 @@ function MiddlePanel() {
     })
       .then(response => response.json())
       .then(data => {
-        setPosts([...posts, data]); // update the state with the new post returned by the server
+        setPosts(prevPosts => [...prevPosts, data]); // update the state with the new post returned by the server
       })
       .catch(error => console.error(error));
   };
+
+
+  useEffect(() => {
+    axios.get('http://112.154.249.74:8080/recruitments/list')
+      .then(response => {
+        const data = response.data;
+        const recruitmentData = data.data.map(item => {
+          const { recruitmentId, title, content, count, field } = item;
+          return { recruitmentId, title, content, count, field };
+        });
+        
+        // const titles = data.data.map(item => item.title);
+        // const contents = data.data.map(item => item.content);
+        // const counts = data.data.map(item => item.count);
+        // const fields = data.data.map(item => item.field);
+
+        setPostIds(recruitmentData);
+        // setPostIds(titles);
+        // setPostIds(contents);
+        // setPostIds(counts);
+        // setPostIds(fields);
+
+        if (Array.isArray(data)) {
+          setPosts(data.data);
+        } else {
+          setPosts([data.data]);
+          data.data.forEach(item => {
+            console.log(item);
+          });
+        }
+      })
+      .catch(error => console.error(error));
+  }, []);
+
 
   return (
     <Div style={{ overflowY: 'scroll', height: '100%' }} onWheel={handleWheel}>
@@ -50,10 +93,10 @@ function MiddlePanel() {
         </Posting>
         {showPopup && (
           <Popup>
-            <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} /><br/>
-            <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)}/><br/>
-            <input type="text" placeholder="총 인원수를 설정하세요요." onChange={(e) => setCount(e.target.value)} /><br/>
-            <input type="text" placeholder="관심분야를 입력하세요." onChange={(e) => setField(e.target.value)} /><br/>
+            <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} /><br />
+            <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)} /><br />
+            <input type="text" placeholder="총 인원수를 설정하세요." onChange={(e) => setCount(e.target.value)} /><br />
+            <input type="text" placeholder="관심분야를 입력하세요." onChange={(e) => setField(e.target.value)} /><br />
             <button onClick={() => setShowPopup(false)}>Cancel</button>
             <button onClick={() => {
               if (title && content && count && field) {
@@ -72,17 +115,25 @@ function MiddlePanel() {
         )}
 
         <Feed>
-          {posts.map((post, index) => (
-            <Post key={index}>
-            <h3>{post.title}</h3>
-            <div className="post-content">{post.content}</div>
-            <small>{new Date(post.timestamp).toLocaleString()}</small>
-            <div>Count: {post.count} | Field: {post.field}</div>
-          </Post>
-          
-
-          ))}
+          <ul>
+            {postIds.map((item) => {
+              return (
+                <Post key={item.recruitmentId}>
+                  <li>
+                  <NavLink to={`/posts/${item.recruitmentId}`}>
+                    <p>{item.recruitmentId}</p>
+                    <h2>제목: {item.title}</h2>
+                    <p>내용: {item.content}</p>
+                    <p>인원수:{item.count}</p>
+                    <p>관심분야: {item.field}</p>
+                    </NavLink>
+                  </li>
+                </Post>
+              );
+            })}
+          </ul>
         </Feed>
+
       </Container>
     </Div>
   )
@@ -142,7 +193,6 @@ const Post = styled.div`
   padding: 20px;
   width: 500px;
   height: auto;
-  left: 30%
   margin: 10px;
   background-color: #F3F8FF;
   border-radius: 10px;

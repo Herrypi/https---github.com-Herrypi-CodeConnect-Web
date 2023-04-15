@@ -9,8 +9,7 @@ import RegisterPage from './components/RegisterPage/RegisterPage';
 import MyPage from './components/MyPage/MyPage';
 import QnAPage from './components/QnAPage/QnAPage';
 import Chatpage from './components/ChatPage/Chatpage';
-
-
+import PostDetail from './components/MainPage/MainPanel/PostDetail';
 
 function App() {
   return (
@@ -22,6 +21,7 @@ function App() {
         <Route path="/chatpage" element={<Chatpage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/q&apage" element={<QnAPage />} />
+        <Route path="/posts/:id" render={(props) => <PostDetail {...props} />} />
       </Routes>
     </Router>
   );

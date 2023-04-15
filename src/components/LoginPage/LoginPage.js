@@ -36,17 +36,18 @@ function LoginPage() {
       .post(BASE_URL, formValues)
       .then((response) => {
         const responseData = response.data;
+        const { token, exprTime, member } = responseData.data;
+
         if (response.status === 200) {
-          const { token, exprTime, member } = responseData.data;
           // save the token in localStorage
           localStorage.setItem('token', token);
-
+          console.log(token);
           // set Authorization header for all axios requests
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
           // dispatch login action to update user state
           
-          console.log(token);
+          
 
 
           dispatch(login(responseData));
