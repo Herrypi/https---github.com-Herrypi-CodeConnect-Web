@@ -60,6 +60,7 @@ function RegisterPage() {
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     try {
       const response = await axios.post(BASE_URL, { ...formValues, address: selectedValue || formValues.address, });
@@ -174,93 +175,94 @@ function RegisterPage() {
 
         </InputContainer>
 
+        <div className="col-md-5">
 
-        <InputContainer>
-          <Label htmlFor="field">관심 분야</Label>
+          <InputContainer>
+            <Label htmlFor="field">관심 분야</Label>
 
-          <RadioContainer>
-            <input
-              type="checkbox"
-              id="Android"
-              name="fieldList"
-              value="Android"
-              onChange={handleChange}
+            <RadioContainer>
+              <input
+                type="checkbox"
+                id="안드로이드"
+                name="fieldList"
+                value="안드로이드"
+                onChange={handleChange}
 
               // checked={formValues.fieldList.includes('Android')}
-            />
-            <RadioLabel htmlFor="Android">Android</RadioLabel>
+              />
+              <RadioLabel htmlFor="Android">안드로이드</RadioLabel>
 
-            <input
-              type="checkbox"
-              id="OS"
-              name="fieldList"
-              value="OS"
-              onChange={handleChange}
+              <input
+                type="checkbox"
+                id="운영체제"
+                name="fieldList"
+                value="운영체제"
+                onChange={handleChange}
 
               // checked={formValues.fieldList.includes('OS')}
-            />
-            <RadioLabel htmlFor="OS">OS</RadioLabel>
+              />
+              <RadioLabel htmlFor="OS">운영체제</RadioLabel>
 
-            <input
-              type="checkbox"
-              id="IOS"
-              name="fieldList"
-              value="IOS"
-              onChange={handleChange}
+              <input
+                type="checkbox"
+                id="ios"
+                name="fieldList"
+                value="ios"
+                onChange={handleChange}
 
               // checked={formValues.fieldList.includes('IOS')}
-            />
-            <RadioLabel htmlFor='IOS'>IOS</RadioLabel>
+              />
+              <RadioLabel htmlFor='IOS'>ios</RadioLabel>
 
-            <input
-              type="checkbox"
-              id="Algorism"
-              name="fieldList"
-              value="Algorism"
-              onChange={handleChange}
+              <input
+                type="checkbox"
+                id="알고리즘"
+                name="fieldList"
+                value="알고리즘"
+                onChange={handleChange}
 
               // checked={formValues.fieldList.includes('Algorism')}
-            />
-            <RadioLabel htmlFor='Algorism'>Algorism</RadioLabel>
+              />
+              <RadioLabel htmlFor='Algorism'>알고리즘</RadioLabel>
 
-            <input
-              type="checkbox"
-              id="Server"
-              name="fieldList"
-              value="Server"
-              onChange={handleChange}
+              <input
+                type="checkbox"
+                id="서버"
+                name="fieldList"
+                value="서버"
+                onChange={handleChange}
 
               // checked={formValues.fieldList.includes('Server')}
-            />
-            <RadioLabel htmlFor='Server'>Server</RadioLabel>
+              />
+              <RadioLabel htmlFor='Server'>서버</RadioLabel>
 
-            <input
-              type="checkbox"
-              id="Web"
-              name="fieldList"
-              value="Web"
-              onChange={handleChange}
+              <input
+                type="checkbox"
+                id="웹"
+                name="fieldList"
+                value="웹"
+                onChange={handleChange}
 
               // checked={formValues.fieldList.includes('Web')}
-            />
-            <RadioLabel htmlFor='Web'>Web</RadioLabel>
+              />
+              <RadioLabel htmlFor='Web'>웹</RadioLabel>
 
-            <input
-              type="checkbox"
-              id="machine learning"
-              name="fieldList"
-              value="machine learning"
-              onChange={handleChange}
+              <input
+                type="checkbox"
+                id="머신러닝"
+                name="fieldList"
+                value="머신러닝"
+                onChange={handleChange}
 
               // checked={formValues.fieldList.includes('machine learning')}
-            />
-          
-            <RadioLabel htmlFor='machine learning'>machine learning</RadioLabel>
+              />
 
-          </RadioContainer>
-          {errors.fieldList && <span>{errors.fieldList}</span>}
-        </InputContainer>
+              <RadioLabel htmlFor='machine learning'>머신러닝</RadioLabel>
 
+            </RadioContainer>
+            {errors.fieldList && <span>{errors.fieldList}</span>}
+          </InputContainer>
+        </div>
         <button className='submit-button' type="submit">회원가입</button>
 
       </FormContainer>
@@ -407,37 +409,6 @@ button {
   cursor: pointer;
 }
 `;
-
-// const Button = styled.button`
-// background-color: #4CAF50;
-//   color: white;
-//   padding: 10px 20px;
-//   border: none;
-//   margin-bottom: 5px;
-//   border-radius: 5px;
-//   font-size: 16px;
-//   cursor: pointer;
-// `;
-
-// const InputRadio = styled.input`
-// margin-right: 10px;
-//   transform: ${({ checkbox }) => checkbox || 'scale(1.4)'};
-//   -webkit-appearance: none;
-//   border: 0.5px solid;
-//   padding: 5px;
-//   border-radius: 2px;
-//   border-color: #FB0552;
-//   position: relative;
-//   margin-left: 10px;
-//   &:checked {
-//     border-color: transparent;
-//     background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M5.707 7.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L7 8.586 5.707 7.293z'/%3e%3c/svg%3e");
-//     background-size: 100% 100%;
-//     background-position: 50%;
-//     background-repeat: no-repeat;
-//     background-color: #FB0552;
-//   }
-// `;
 
 const RadioContainer = styled.div`
   display: flex;

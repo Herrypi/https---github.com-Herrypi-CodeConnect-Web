@@ -3,7 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { login, logout } from '../../redux/actions/userActions';
+import { login, logout, setNickname } from '../../redux/actions/userActions';
+// import { setNickname } from '../../redux/reducers';
 
 const { localStorage } = window;
 
@@ -37,18 +38,25 @@ function LoginPage() {
       .then((response) => {
         const responseData = response.data;
         const { token, exprTime, member } = responseData.data;
-
+        const nickname = member.nickname;
         if (response.status === 200) {
           // save the token in localStorage
           localStorage.setItem('token', token);
+          localStorage.setItem('expiryDate', exprTime)
           console.log(token);
+          console.log(exprTime);
+          console.log(responseData)
           // set Authorization header for all axios requests
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
           // dispatch login action to update user state
+          // console.log()
           
-          
+          // console.log(responseData.data.member.nickname);
 
+          // console.log(nickname);
+
+          dispatch(setNickname(nickname))
 
           dispatch(login(responseData));
 
