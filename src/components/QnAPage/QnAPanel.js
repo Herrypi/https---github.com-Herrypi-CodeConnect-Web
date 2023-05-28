@@ -21,6 +21,10 @@ function QnAPanel() {
     const [selectedQnA, setSelectedQnA] = useState(null);
     const [showQnAPost, setShowQnAPost] = useState(null);
 
+    const [imageList, setImageList] = useState([]);
+
+    const [profileImageList, setProfileImageList] = useState([]);
+
     const token = localStorage.getItem('token');
 
     const addQnAPost = () => {
@@ -53,29 +57,19 @@ function QnAPanel() {
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
-                    const { commentCount, content, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
-                    return { commentCount, content, currentDateTime, modifiedDateTime, nickname, qnaId, title };
+                    const { commentCount, content, imagePath, profileImagePath, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
+                    return { commentCount, content, imagePath, profileImagePath, currentDateTime, modifiedDateTime, nickname, qnaId, title };
                 });
                 setSearchResult(qnaData);
+
             })
             .catch(error => console.error(error));
     }
-
-    const currentTime = new Date(); // 현재 시간
-
-    const getTimeDiff = (currentTime, currentDateTime) => {
-        const diffInMs = currentTime - currentDateTime;
-        const diffInMin = Math.floor(diffInMs / 60000);
-        return diffInMin;
-    };
-
-    
 
     function handleQnAClick(qnapost) {
         setSelectedQnA(qnapost);
         setShowQnAPost(true);
     }
-
 
     function handleWheel(event) {
         // Update the position based on the amount of scrolling
@@ -87,53 +81,96 @@ function QnAPanel() {
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
-                    const { commentCount, content, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
-                    return { commentCount, content, currentDateTime, modifiedDateTime, nickname, qnaId, title };
+                    const { commentCount, content, imagePath, profileImagePath, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
+                    return { commentCount, content, imagePath, profileImagePath, currentDateTime, modifiedDateTime, nickname, qnaId, title };
                 });
 
-                
                 // console.log(data);
                 setqnaIds(qnaData);
-                console.log(qnaData)
+                setImageList(qnaData.map(item => item.imagePath));
+                setProfileImageList(qnaData.map(item => item.profileImagePath));
+                // console.log(qnaData.map(item => item.imagePath))
+                // console.log(data.data);
             })
             .catch(error => console.error(error));
 
         console.log(currentTime)
 
-    },[]);
+    }, []);
 
+    const currentTime = new Date().toISOString();
+
+    const getTimeDiff = (currentTime, currentDateTime) => {
+        const currentTimeObject = new Date(currentTime);
+        const [date, time] = currentDateTime.split(" ");
+        const [day, month, year] = date.split("/");
+        const [hour, minute, second] = time.split(":");
+
+        // console.log(day, month, year, hour, minute, second); // 로그 추가
+
+        const postTimeObject = new Date(`20${year}`, month - 1, day, hour, minute, second);
+        // console.log(postTimeObject)
+        const diffInMs = currentTimeObject.getTime() - postTimeObject.getTime();
+        const diffInMin = Math.floor(Math.abs(diffInMs) / (1000 * 60));
+        const diffInHours = Math.floor(diffInMin / 60);
+        const diffInDays = Math.floor(diffInHours / 24); // 시간 단위를 기준으로 일 단위 계산
+
+        if (diffInMin < 60) {
+            return `${diffInMin}분 전`;
+        } else if (diffInHours < 24) {
+            return `${diffInHours}시간 전`;
+        } else {
+            return `${diffInDays}일 전`;
+        }
+    };
 
 
     return (
         <Div>
             <Container>
-
                 <Posting onClick={() => setShowPopupCreat(true)}>
                     <AiOutlinePlusCircle />
                 </Posting>
 
                 <SearchQnAFeed>
-                    <input type="text" placeholder="검색어를 입력하세요" value={searchText} onChange={(e) => setSearchText(e.target.value)} />
+                    <input
+                        type="text"
+                        placeholder="검색어를 입력하세요"
+                        value={searchText}
+                        onChange={e => setSearchText(e.target.value)}
+                    />
                     <button onClick={searchQnAPosts}>검색</button>
                 </SearchQnAFeed>
 
-
-
-                {showPopupCreat && ( //질문 글 포스팅
+                {showPopupCreat && (
+                    //질문 글 포스팅
                     <PopupCreat>
-                        <input type="text" placeholder='제목을 입력하세요' onChange={(e) => setTitle(e.target.value)} /><br />
-                        <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)} /><br />
+                        <input
+                            type="text"
+                            placeholder="제목을 입력하세요"
+                            onChange={e => setTitle(e.target.value)}
+                        />
+                        <br />
+                        <textarea
+                            placeholder="내용을 입력하세요."
+                            onChange={e => setContent(e.target.value)}
+                        />
+                        <br />
                         <button onClick={() => setShowPopupCreat(false)}>Cancel</button>
-                        <button onClick={() => {
-                            if (title && content) {
-                                addQnAPost();
-                                setShowPopupCreat(false);
-                                setTitle('');
-                                setContent('');
-                            } else {
-                                alert("빈칸을 채워 주세요.")
-                            }
-                        }}>Create</button>
+                        <button
+                            onClick={() => {
+                                if (title && content) {
+                                    addQnAPost();
+                                    setShowPopupCreat(false);
+                                    setTitle('');
+                                    setContent('');
+                                } else {
+                                    alert('빈칸을 채워 주세요.');
+                                }
+                            }}
+                        >
+                            Create
+                        </button>
                     </PopupCreat>
                 )}
                 <hr />
@@ -142,27 +179,45 @@ function QnAPanel() {
                         <StyledQnAFeed>
                             <ul className="list-unstyled">
                                 {searchResult.length > 0 ? (
-                                    searchResult.map((item) => (
+                                    searchResult.map((item, index) => (
                                         <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
+                                            <div className="qna-card-profile">
+                                                {item.profileImagePath && (
+                                                    <img className="profile-image" src={"http://112.154.249.74:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                                )}
+                                                <p className="nickname">{item.nickname}</p>
+                                            </div>
+
                                             <li className="qna-post">
-                                                <p className="qns-card-time">👤 {item.nickname}</p>
                                                 <div className="qna-card">
                                                     <h2 className="qna-card-title">{item.title}</h2>
+
                                                     <p className="qna-card-content">내용: {item.content}</p>
-                                                    <p className="qna-card-time">시간: {getTimeDiff(currentTime, item.currentDateTime)}분 전</p>
+                                                    <p className="qna-card-time">
+                                                        시간: {item.currentDateTime}
+                                                    </p>
+
                                                 </div>
                                             </li>
                                         </QnAPost>
                                     ))
                                 ) : (
-                                    qnaIds.map((item) => (
+                                    qnaIds.map((item, index) => (
                                         <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
-                                            <p className="qns-card-time">👤 {item.nickname}</p>
+                                            <div className="qna-card-profile">
+                                            {item.profileImagePath && (
+                                                <img className="profile-image" src={"http://112.154.249.74:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                            )}
+                                            <p className="nickname">{item.nickname}</p>
+                                        </div>
                                             <li className="qna-post">
                                                 <div className="qna-card">
                                                     <h2 className="qna-card-title">{item.title}</h2>
+
                                                     <p className="qna-card-content">내용: {item.content}</p>
-                                                    <p className="qna-card-time">시간: {getTimeDiff(currentTime, item.currentDateTime)}분 전</p>
+                                                    <p className="qna-card-time">
+                                                    시간: {item.currentDateTime}
+                                                    </p>
                                                 </div>
                                             </li>
                                         </QnAPost>
@@ -181,6 +236,7 @@ function QnAPanel() {
     )
 }
 export default QnAPanel
+
 {/* <div className="rounded-circle profile-img mr-3">👤</div> */ }
 
 const Div = styled.div`
@@ -211,10 +267,34 @@ const QnAPost = styled.div`
   background-color: #F3F8FF;
   border-radius: 10px;
 
+  .qna-card-profile {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+  }
+
+  .profile-image {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+
+  .nickname {
+    font-weight: bold;
+    
+  }
+
   .post-content {
     margin-top: 10px;
     font-size: 16px;
     white-space: pre-wrap;
+  }
+  .qna-card-image {
+    max-width: 100%;
+    max-height: 300px; /* 원하는 높이로 조절하세요 */
+    object-fit: contain; /* 이미지 비율 유지를 위한 옵션입니다. 필요에 따라 변경할 수 있습니다. */
   }
 `;
 

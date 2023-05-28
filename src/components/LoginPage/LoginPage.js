@@ -37,8 +37,8 @@ function LoginPage() {
       .post(BASE_URL, formValues)
       .then((response) => {
         const responseData = response.data;
-        const { token, exprTime, member } = responseData.data;
-        const nickname = member.nickname;
+        const { token, exprTime, nickname, fieldList, address } = responseData.data;
+        
         if (response.status === 200) {
           // save the token in localStorage
           localStorage.setItem('token', token);
@@ -46,6 +46,8 @@ function LoginPage() {
           console.log(token);
           console.log(exprTime);
           console.log(responseData)
+          console.log(fieldList)
+          console.log(address)
           // set Authorization header for all axios requests
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
