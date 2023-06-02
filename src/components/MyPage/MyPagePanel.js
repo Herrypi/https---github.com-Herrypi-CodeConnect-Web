@@ -40,6 +40,30 @@ function MyPagePanel() {
         // ...
     });
 
+    const getColorClass = (field) => {
+        switch (field) {
+          case '안드로이드':
+            return 'color-and';
+          case 'ios':
+            return 'color-ios';
+          case '알고리즘':
+            return 'color-algorithm';
+          case '데이터베이스':
+            return 'color-database';
+          case '운영체제':
+            return 'color-os';
+          case '서버':
+            return 'color-server';
+          case '웹':
+            return 'color-web';
+          case '머신러닝':
+            return 'color-ml';
+          default:
+            return '';
+        }
+      };
+      
+
     const [result, setResults] = useState([]);
     const [dong, setDong] = useState("");
 
@@ -246,9 +270,10 @@ function MyPagePanel() {
 
 
     return (
-        <Div style={{ overflowY: 'scroll', height: '100%' }} onWheel={handleWheel}>
-            <Container>
-                <Row>
+        <Div style={{ overflowY: 'scroll', height: '100%', backgroundColor:'#F3F6FF' }} onWheel={handleWheel}>
+            <Container >
+                
+                <Row >
                     <Col md={4}>
                         <Profile>
                             <img
@@ -272,6 +297,7 @@ function MyPagePanel() {
                             </Form.Group>
 
                             <Form.Group>
+                                <Info>
                                 {myInfo && myInfo.fieldList && Array.isArray(myInfo.fieldList) && (
                                     <Form.Label>
                                         관심분야
@@ -279,27 +305,29 @@ function MyPagePanel() {
                                             {myInfo.fieldList.map((field, index) => (
                                                 <div
                                                     key={index}
+                                                    className={`${getColorClass(field)} field-item`}
                                                     style={{
-                                                        border: '1px solid white',
-                                                        backgroundColor: 'white',
+                                                        border: '1px solid black',
                                                         borderRadius: '40px',
                                                         padding: '8px',
-                                                        marginRight: '8px'
-                                                    }}
+                                                        marginRight: '8px',
+                                                        width: 'auto'
+                            
+                                                      }}
                                                 >
                                                     {field}
                                                 </div>
                                             ))}
                                         </div>
                                     </Form.Label>
-                                )}
+                                )}</Info>
 
 
                             </Form.Group>
                         </Form>
                     </Col>
                 </Row>
-                <hr />
+                <hr/>
                 <List>
                     <ButtonGroup>
 
@@ -488,14 +516,52 @@ const Div = styled.div`
   padding-left: 10px;
   padding-top: 50px;
   height: 100%;
-  background-color: #cfdcff;
+  background-color: white;
+
+  
 `;
 
 const Container = styled.div`
 width: 85%
 heigth: 85%;
-
 `;
+const Info = styled.div`
+.color-and {
+    background-color: #576EF3;
+    font-weight: bold;
+
+  }
+  .color-ios {
+    background-color: #42ABDD;
+    font-weight: bold;
+
+  }
+  .color-algorithm {
+    background-color: #45C64A;
+        font-weight: bold;
+  }
+  .color-database {
+    background-color: #E1A856;
+        font-weight: bold;
+  }
+  .color-os {
+    background-color: #ED6236
+        font-weight: bold;
+  }
+  .color-server {
+    background-color: #A025B5
+        font-weight: bold;
+  }
+  .color-web {
+    background-color: #2783CC
+        font-weight: bold;
+  }
+  .color-ml {
+    background-color: #E6B41D
+        font-weight: bold;
+  }
+`;
+
 const Posts = styled.div`
 width: 80%;
 

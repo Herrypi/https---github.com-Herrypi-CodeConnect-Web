@@ -50,7 +50,7 @@ function PopupQnAPost({ qnapost, onClose }) {
             .then((response) => {
                 const liked = response.data.data.liked;
                 const updatedLikeCount = response.data.data.likeCount;
-    
+
                 setLiked(liked);
                 setQnaData(prevQnaData => ({
                     ...prevQnaData,
@@ -62,7 +62,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                 console.error(error);
             });
     };
-    
+
 
 
 
@@ -112,7 +112,7 @@ function PopupQnAPost({ qnapost, onClose }) {
             setProfileImageList(qnaData.profileImagePath);
             setLiked(qnaData.liked);
             setLikedCount(qnaData.likeCount);
-            
+
 
         } else {
             setNickname('');
@@ -181,27 +181,30 @@ function PopupQnAPost({ qnapost, onClose }) {
                     <ModalContainer onClick={onClose} />
 
                     <PopupContainer>
+
                         {qnaData.type === Role.HOST && (
                             <>
-                                <div className="qna-card-profile">
-                                    <img
-                                        className="profile-image"
-                                        src={"http://112.154.249.74:8080/" + qnapost.profileImagePath}
-                                        alt="게시글이미지"
-                                    />
-                                    <p>{qnaData.nickname}</p>
-                                </div>
-                                <h2 className="mb-4">{qnaData.title}</h2>
-                                <div onWheel={handleWheel}>
-                                    {qnaData.imagePath && ( //게시물 내용에 들어가는 사진
+                                <PostsContainer onWheel={handleWheel}>
+                                    <div className="qna-card-profile">
                                         <img
-                                            className="qna-card-image"
-                                            src={"http://112.154.249.74:8080/" + qnaData.imagePath}
+                                            className="profile-image"
+                                            src={"http://112.154.249.74:8080/" + qnapost.profileImagePath}
                                             alt="게시글이미지"
                                         />
-                                    )}
-                                    <p>{qnaData.content}</p>
-                                </div>
+                                        <p>{qnaData.nickname}</p>
+                                    </div>
+                                    <h2 className="mb-4">{qnaData.title}</h2>
+                                    <div onWheel={handleWheel}>
+                                        {qnaData.imagePath && ( //게시물 내용에 들어가는 사진
+                                            <img
+                                                className="qna-card-image"
+                                                src={"http://112.154.249.74:8080/" + qnaData.imagePath}
+                                                alt="게시글이미지"
+                                            />
+                                        )}
+                                        <p>{qnaData.content}</p>
+                                    </div>
+                                </PostsContainer>
                                 <div className="qna-card-buttons">
                                     <button className="btn btn-danger me-3" onClick={handleDeleteQnaPost}>
                                         삭제
@@ -277,23 +280,26 @@ function PopupQnAPost({ qnapost, onClose }) {
 
                         {qnaData.type === Role.GUEST && (
                             <>
-                                <div className="qna-card-profile">
-                                    <img
-                                        className="profile-image"
-                                        src={"http://112.154.249.74:8080/" + qnapost.profileImagePath}
-                                        alt="게시글이미지"
-                                    />
-                                    <p>{qnaData.nickname}</p>
-                                </div>
-                                <h2 className="mb-4">{qnaData.title}</h2>
-                                {qnaData.imagePath && (
-                                    <img
-                                        className="qna-card-image"
-                                        src={"http://112.154.249.74:8080/" + qnaData.imagePath}
-                                        alt="게시글이미지"
-                                    />
-                                )}
-                                <p>{qnaData.content}</p>
+                                <PostsContainer onWheel={handleWheel}>
+
+                                    <div className="qna-card-profile">
+                                        <img
+                                            className="profile-image"
+                                            src={"http://112.154.249.74:8080/" + qnapost.profileImagePath}
+                                            alt="게시글이미지"
+                                        />
+                                        <p>{qnaData.nickname}</p>
+                                    </div>
+                                    <h2 className="mb-4">{qnaData.title}</h2>
+                                    {qnaData.imagePath && (
+                                        <img
+                                            className="qna-card-image"
+                                            src={"http://112.154.249.74:8080/" + qnaData.imagePath}
+                                            alt="게시글이미지"
+                                        />
+                                    )}
+                                    <p>{qnaData.content}</p>
+                                </PostsContainer>
                                 <div className="like-count-container">
                                     <img
                                         className="heart-icon"
@@ -372,77 +378,82 @@ function PopupQnAPost({ qnapost, onClose }) {
 export default PopupQnAPost
 
 const ModalContainer = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 99;
-`;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 99;
+            `;
 
 const PopupContainer = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 500px;
-  height: auto;
-  transform: translate(-50%, -50%);
-  z-index: 9990;
-  background-color: white;
-  padding: 20px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 500px;
+            height: 750px;
+            transform: translate(-50%, -50%);
+            z-index: 9990;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
 
-  .form {
-    margin-bottom: 20px;
+            .form {
+                margin - bottom: 20px;
   }
-  .qna-card-image {
-    width: 450px;
-    max-height: 200px; /* 원하는 높이로 조절하세요 */
-    object-fit: contain; /* 이미지 비율 유지를 위한 옵션입니다. 필요에 따라 변경할 수 있습니다. */
+            .qna-card-image {
+                width: 450px;
+            max-height: 200px; /* 원하는 높이로 조절하세요 */
+            object-fit: contain; /* 이미지 비율 유지를 위한 옵션입니다. 필요에 따라 변경할 수 있습니다. */
     
 
   }
-  .profile-image {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 10px;
+            .profile-image {
+                width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
   }
-  .qna-card-profile {
-    display: flex;
-    align-items: center;
-    margin-right: 20px;
+            .qna-card-profile {
+                display: flex;
+            align-items: center;
+            margin-right: 20px;
   }
-  .heart-icon{
-    width: 30px;
-    height: 30px;
-    object-fit: cover;
-    margin-right: 10px;
+            .heart-icon{
+                width: 30px;
+            height: 30px;
+            object-fit: cover;
+            margin-right: 10px;
   }
-  .like-count-container{
-    display: flex;
-    align-items: center;
-    margin-right: 20px;
+            .like-count-container{
+                display: flex;
+            align-items: center;
+            margin-right: 20px;
   }
-  .qna-card-buttons{
-    display: flex;
-    justify-content: flex-end;
+            .qna-card-buttons{
+                display: flex;
+            justify-content: flex-end;
   }
-`;
+            `;
 
 const CommentContainer = styled.div`
-  overflow-y: auto;
-  height: 200px;
-  margin-top: 10px;
+            overflow-y: auto;
+            height: 200px;
+            margin-top: 10px;
 
-  .profile-image {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 10px;
+            .profile-image {
+                width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
   }
-`;
+            `;
+
+const PostsContainer = styled.div`
+            overflow-y: auto;
+            height: 400px;
+            `;

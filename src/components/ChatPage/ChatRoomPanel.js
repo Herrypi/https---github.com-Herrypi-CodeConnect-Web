@@ -51,9 +51,8 @@ function ChatRoomPanel() {
                 </div>
               </div>
             ))}
-
-            <VerticalLine />
           </div>
+          <VerticalLine />
         </ChatRoomList>
         <div className="col-md-8 col-lg-9">
           {/* 채팅창 */}
@@ -69,14 +68,16 @@ function ChatRoomPanel() {
 export default ChatRoomPanel;
 
 const ChatRoomList = styled.div`
-  height: calc(100vh - 0px); /* 화면 높이에서 20px만큼 뺀 크기로 설정 */
+  height: 100px; /* 화면 높이에서 20px만큼 뺀 크기로 설정 */
   overflow-y: auto; /* 내용이 넘칠 경우 스크롤 표시 */
   width: 80%; /* 좌우 간격을 조정하는 부분입니다. 필요에 따라 값 수정 가능 */
   padding-right: 10px; /* 우측 간격 조정 */
   transition: width 0.3s; /* 애니메이션 효과를 위한 트랜지션 추가 */
-
+  
+  
   &.selected {
-    width: 20%; /* 채팅방 선택 시 좁아지는 너비로 설정 */
+    width: 25%; /* 채팅방 선택 시 좁아지는 너비로 설정 */
+    
   }
   .heart-icon{
     width: 30px;
@@ -98,7 +99,7 @@ const Div = styled.div`
   padding-left: 10px;
   padding-top: 10px;
   height: 100%;
-  background-color: #cfdcff;
+  background-color: #2F4074
 `;
 
 const activeColor = "#f8f8f8"; // 활성화된 채팅방 배경색
