@@ -44,8 +44,9 @@ function ChatRoomPanel() {
               >
                 <div className="card-body">
                   {/* 채팅방 목록 내용 */}
+                  <p><img className="heart-icon" src="Images/logos/owner.png"/>{item.hostNickname}</p>
+
                   <h5>{item.title}</h5><p><FaUser/> {item.currentCount}</p>
-                  {/* <p>방장: {item.hostNickname}</p> */}
                   {/* <p>인원수: {item.currentCount}</p> */}
                 </div>
               </div>
@@ -76,6 +77,12 @@ const ChatRoomList = styled.div`
 
   &.selected {
     width: 20%; /* 채팅방 선택 시 좁아지는 너비로 설정 */
+  }
+  .heart-icon{
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    margin-right: 10px;
   }
 `;
 

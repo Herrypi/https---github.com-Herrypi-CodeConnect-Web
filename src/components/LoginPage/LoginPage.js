@@ -19,9 +19,9 @@ function LoginPage() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  const goToSingup = () => {
-    navigate("/register")
-  }
+  const goToSignup = () => {
+    navigate('/register');
+  };
 
   const handleChange = (e) => {
     setFormValues({
@@ -38,38 +38,26 @@ function LoginPage() {
       .then((response) => {
         const responseData = response.data;
         const { token, exprTime, nickname, fieldList, address } = responseData.data;
-        
+
         if (response.status === 200) {
-          // save the token in localStorage
+          // Save the token in localStorage
           localStorage.setItem('token', token);
-          localStorage.setItem('expiryDate', exprTime)
-          console.log(token);
-          console.log(exprTime);
-          console.log(responseData)
-          console.log(fieldList)
-          console.log(address)
-          // set Authorization header for all axios requests
+          localStorage.setItem('expiryDate', exprTime);
+
+          // Set Authorization header for all axios requests
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
-          // dispatch login action to update user state
-          // console.log()
-          
-          // console.log(responseData.data.member.nickname);
 
-          // console.log(nickname);
-
-          dispatch(setNickname(nickname))
-
+          // Dispatch login action to update user state
+          dispatch(setNickname(nickname));
           dispatch(login(responseData));
 
-          // navigate to home page
-          navigate("/");
+          // Navigate to the home page
+          navigate('/', { state: { address } });
         }
       })
       .catch((errors) => {
         setErrors(errors.response.data);
       });
-
   };
 
   const handleLogout = () => {
@@ -83,40 +71,51 @@ function LoginPage() {
 
   return (
     <FormContainer onSubmit={handleSubmit}>
-      <Header>
-        <Logo>로그인</Logo>
-      </Header>
-      <InputContainer>
-        <Label htmlFor="email">이메일 입력</Label>
-        <Input
-          type="email"
-          id="email"
-          name="email"
-          value={formValues.email}
-          onChange={handleChange}
-          required
-        />
-        {errors.email && <span>{errors.email}</span>}
-      </InputContainer>
-      <InputContainer>
-        <Label htmlFor="password">비밀번호</Label>
-        <Input
-          type="password"
-          id="password"
-          name="password"
-          value={formValues.password}
-          onChange={handleChange}
-          required
-        />
-        {errors.password && <span>{errors.password}</span>}
-      </InputContainer>
-      <button type="submit">로그인</button>
-      <button onClick={goToSingup}>회원가입</button>
+      <FormBackgroundImage />
+
+      
+      <Div>
+
+        <InputContainer>
+        <Logo>Login</Logo>
+          <Div1>
+          <Label htmlFor="email">이메일 입력</Label>
+          <Input
+            type="email"
+            id="email"
+            name="email"
+            value={formValues.email}
+            onChange={handleChange}
+            required
+          />
+          {errors.email && <span>{errors.email}</span>}
+          </Div1>
+          <Div1>
+          <Label htmlFor="password">비밀번호</Label>
+          <Input
+            type="password"
+            id="password"
+            name="password"
+            value={formValues.password}
+            onChange={handleChange}
+            required
+          />
+          {errors.password && <span>{errors.password}</span>}
+          </Div1>
+        </InputContainer>
+        <ButtonContainer>
+        <Anchor onClick={goToSignup}>Join the membership</Anchor>
+
+        <Button type="submit">로그인</Button>
+      </ButtonContainer>
+      </Div>
+
     </FormContainer>
   );
 }
 
 export default LoginPage;
+
 
 const FormContainer = styled.form`
   display: flex;
@@ -129,18 +128,23 @@ const Header = styled.div`
   display: center;
   position: fixed;
   top: 0;
-
   width: 100vw;
   height: 70px;
   padding: auto;
-  background-color: #CFDCFF;
+  background-color: white;
+`;
+
+const Div = styled.div`
+  margin-bottom: 100px;
+  margin-top: 150px;
 `;
 
 const Logo = styled.div`
   font-weight: bolder;
-  margin-top: 10px;
+  margin-top: 30px;
+  margin-left: 100px;
   display: flex;
-  color: #515151;
+  color: #2F4074;
   font-size: 30px;
   position: absolute;
   left: 20%;
@@ -149,7 +153,6 @@ const Logo = styled.div`
 const InputContainer = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: 1rem;
   width: 100%;
   max-width: 400px;
 `;
@@ -158,8 +161,9 @@ const Label = styled.label`
   display: flex;
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
-  color: gray;
+  color: #2F4074;
   font-weight: bolder;
+  width: 150px;
 `;
 
 const Input = styled.input`
@@ -169,4 +173,66 @@ const Input = styled.input`
   border-radius: 0.3rem;
   width: 100%;
   margin-top: 0.5rem;
-  border-color: #fb055`;
+  border-color: #fb055;
+`;
+
+const Button = styled.button`
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 25px;
+  background-color: #2F4074;
+  color: white;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background-color 0.3s ease;
+
+
+
+  &:hover {
+    background-color: #b8c6e2;
+  }
+`;
+
+const FormBackgroundImage = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 110%;
+  background-image: url('Images/logos/loginbackimg.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  z-index: -1;
+`;
+
+const Div1 = styled.div`
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 400px;
+ 
+`;
+
+const Anchor = styled.a`
+  /* Button styles */
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  color: #2F4074;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+
+  &:hover {
+    color: #b8c6e2;
+  }
+`;

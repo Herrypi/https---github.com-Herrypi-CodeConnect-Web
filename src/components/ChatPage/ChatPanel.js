@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { Client } from '@stomp/stompjs';
 import axios from 'axios';
-import { FaUser } from 'react-icons/fa';
 import ChatRightPanel from './ChatRightPanel';
 
 
@@ -11,23 +10,53 @@ const ChatPanel = ({ roomId, roomTitle }) => {
   const [inputText, setInputText] = useState('');
   const [nickname, setNickname] = useState('');
   const [stompClient, setStompClient] = useState(null);
-
+  const [fileToUpload, setFileToUpload] = useState(null);
   const [myProfileImage, setMyProfileImage] = useState([]);
   const [showChecklist, setShowChecklist] = useState(false);
-
   const chatContentRef = useRef(null);
-
   const [chatPersonList, setChatPersonList] = useState([]);
-
-
   const [showPersonList, setShowPersonList] = useState(false);
+  const [todoList, setTodoList] = useState([])
+  const [creattodo, setCreateTodo] = useState('');
+  const [subscribedTodoList, setSubscribedTodoList] = useState([]);
+
+  const [fileContentType, setFileContentType] = useState("");
+  const [filePath, setFilePath] = useState("")
+  const [fileSize, setFileSize] = useState("")
+
+  const toggleChecklist = () => {
+    setShowChecklist(!showChecklist);
+  };
 
   const togglePersonList = () => {
     setShowPersonList(!showPersonList);
   };
 
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
 
+    if (file) {
+      setFileToUpload(file);
+    }
+  };
 
+  const handleFileDownload = async (message) => {
+    // const filePath = message.message.match(/파일경로:\s(.*?)\n/)[1];
+    // const fileType = message.message.match(/파일타입:\s(.*?)\n/)[1];
+    // const fileSize = message.message.match(/파일크기:\s(.*?)MB/)[1];
+  
+    if (message.messageType === "FILE") {
+      const downloadUrl = `http://112.154.249.74:8080/chat/file/download?filePath=${filePath}&fileContentType=${fileContentType}`;
+  
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute("download", `파일경로: ${filePath}`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+  
 
 
   useEffect(() => {
@@ -40,15 +69,16 @@ const ChatPanel = ({ roomId, roomTitle }) => {
         chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
       }
     };
-
     // Fetch previous chat history
     axios.get(`http://112.154.249.74:8080/chatRoom/${roomId}`)
       .then(response => {
         const data = response.data;
-        // console.log(data);
+        console.log(data);
         setMessageList(data.data.CHAT);
         setNickname(data.data.MY_NICKNAME);
         setMyProfileImage(data.data.NICKNAME_IMAGE);
+        setTodoList(data.data.TODO_LIST)
+        // console.log(data.data.TODO_LIST)
 
         // console.log(data.data.NICKNAME_IMAGE)
 
@@ -81,11 +111,30 @@ const ChatPanel = ({ roomId, roomTitle }) => {
         console.log('STOMP 연결 성공');
         const subscribeCallback = (message) => {
           const receivedMessage = JSON.parse(message.body);
+          console.log(receivedMessage)
+          // 채팅일 경우
+          if (receivedMessage.type === "chat") {
+            receivedMessage.messageType = "CHAT";
+          } else if (receivedMessage.type === "file") {
+            receivedMessage.messageType = "FILE";
+          }
+
+          // console.log(receivedMessage.messageType);
           setMessageList(prevList => [...prevList, receivedMessage]);
+          // console.log(prevList => [...prevList, receivedMessage])
           scrollToBottom();
+
+        };
+        const updateSubscribedTodoList = (message) => {
+          const receivedTodoList = JSON.parse(message.body);
+          setSubscribedTodoList(prevList => [...prevList, receivedTodoList]);
         };
         const destination = `/sub/chat/room/${roomId}`;
         const subscription = client.subscribe(destination, subscribeCallback);
+
+        const todoSubscription = client.subscribe(`/sub/todo/room/${roomId}`, updateSubscribedTodoList);
+
+
         setStompClient(client);
       },
     });
@@ -114,6 +163,46 @@ const ChatPanel = ({ roomId, roomTitle }) => {
     };
   }, [roomId]);
 
+  //아래꺼 파일 보내기
+
+  const sendFile = async (file) => {
+    if (!stompClient || !stompClient.connected) {
+      console.error("STOMP 클라이언트가 초기화되지 않았거나 연결되지 않았습니다.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post('http://112.154.249.74:8080/chat/file/upload', formData);
+      const fileId = response.data.fileId;
+      const fileName = response.data.fileName;
+      const data = response.data;
+      console.log(response.data);
+      setFileContentType(data.data.fileContentType);
+      setFilePath(data.data.filePath);
+      setFileSize(data.data.fileSize);
+
+      const message = {
+        roomId: roomId,
+        nickname: nickname,
+        message: `파일경로: ${data.data.filePath}\n파일타입: ${data.data.fileContentType}\n파일크기: ${data.data.fileSize}`,
+        messageType: "FILE",
+        fileId: fileId,
+        fileName: fileName,
+      };
+
+      stompClient.publish({
+        destination: "/pub/chat/message",
+        body: JSON.stringify(message),
+      });
+    } catch (error) {
+      console.error('파일 업로드 실패:', error);
+    }
+  };
+
+
   const sendMessage = (text) => {
     if (!stompClient || !stompClient.connected) {
       console.error("STOMP 클라이언트가 초기화되지 않았거나 연결되지 않았습니다.");
@@ -127,25 +216,66 @@ const ChatPanel = ({ roomId, roomTitle }) => {
     const message = {
       roomId: roomId,
       nickname: nickname,
+      messageType: "CHAT",
+      fileContentType: fileContentType,
+      filePath: filePath,
       message: text,
+      type: "chat"
     };
 
     stompClient.publish({
       destination: "/pub/chat/message",
       body: JSON.stringify(message),
     });
-
     setInputText('');
   };
+
+
+  //투두리스트 보내기
+  const sendTodoList = (content) => {
+    if (!stompClient || !stompClient.connected) {
+      console.error("STOMP 클라이언트가 초기화되지 않았거나 연결되지 않았습니다.");
+      return;
+    }
+    if (!content) { // Check if content is empty
+      return;
+    }
+
+    const create = {
+      roomId: roomId,
+      content: content,
+    };
+
+    stompClient.publish({
+      destination: "/pub/todo/create",
+      body: JSON.stringify(create),
+    });
+    setCreateTodo('');
+  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!inputText) {
+    if (fileToUpload) {
+      sendFile(fileToUpload);
+      setFileToUpload(null);
+
+    } else if (inputText) {
+      sendMessage(inputText);
+    }
+
+    setInputText('');
+  };
+
+
+  const handleTodoSubmit = (event) => { //투두리스트 전송
+    event.preventDefault();
+
+    if (!creattodo) {
       return;
     }
 
-    sendMessage(inputText);
+    sendTodoList(creattodo);
   };
 
   if (!roomId) {
@@ -167,7 +297,19 @@ const ChatPanel = ({ roomId, roomTitle }) => {
                 <ChatTitle>
                   {roomTitle}
                 </ChatTitle>
-                
+                <button onClick={toggleChecklist}>todoList 생성하기</button>
+                {showChecklist && (
+                  <form onSubmit={handleTodoSubmit}>
+                    <div>
+                      <input
+                        type="text"
+                        value={creattodo}
+                        onChange={event => setCreateTodo(event.target.value)}
+                      />
+                      <button type="submit">추가하기</button>
+                    </div>
+                  </form>
+                )}
                 <ChatContent ref={chatContentRef}>
                   {messageList.map((message, index) => (
                     <MessageBubble
@@ -185,9 +327,18 @@ const ChatPanel = ({ roomId, roomTitle }) => {
                         {message.nickname !== nickname && (
                           <MessageNickname>{message.nickname}</MessageNickname>
                         )}
-                        <MessageText isMyMessage={message.nickname === nickname}>
-                          {message.message}
-                        </MessageText>
+                        {message.messageType === "FILE" ? (
+                          <FileMessage isMyMessage={message.nickname === nickname}>
+                            <FileName>{message.message}<br /></FileName>
+                            <FileDownloadButton onClick={() => handleFileDownload(message)}>
+                              다운로드
+                            </FileDownloadButton>
+                          </FileMessage>
+                        ) : (
+                          <MessageText isMyMessage={message.nickname === nickname}>
+                            {message.message}
+                          </MessageText>
+                        )}
                       </MessageContent>
                     </MessageBubble>
                   ))}
@@ -203,21 +354,23 @@ const ChatPanel = ({ roomId, roomTitle }) => {
                         value={inputText}
                         onChange={event => setInputText(event.target.value)}
                       />
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                        onChange={handleFileUpload}
+                      />
                     </div>
                     <button type="submit" className="btn btn-primary">
                       전송
                     </button>
                   </form>
-
                 </ChatInput>
               </div>
             </div>
             <VerticalLine />
-
           </div>
-
           <div className="col-md-3">
-            <ChatRightPanel chatPersonList={chatPersonList} />
+            <ChatRightPanel chatPersonList={chatPersonList} chatTodoList={todoList} liveChatTodoList={subscribedTodoList} />
           </div>
         </div>
 
@@ -313,66 +466,6 @@ const ProfileImage = styled.img`
   margin-right: 5px;
 `;
 
-const ListButton = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-`;
-
-const ListIcon = styled.i`
-  font-size: 24px;
-  color: #555;
-`;
-
-const Drawer = styled.div`
-  position: absolute;
-  top: 40px;
-  right: 10px;
-  background-color: #fff;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-`;
-
-const DrawerPerson = styled.div`
-  position: absolute;
-  top: 40px;
-  left: 70px;
-  background-color: #fff;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-`;
-
-const DrawerContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-`;
-
-
-const DrawerItem = styled.div`
-  cursor: pointer;
-  padding: 5px;
-  &:hover {
-    background-color: #f2f2f2;
-  }
-`;
-
-const ProfileContainer = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-`;
-
-const ProfileName = styled.span`
-  font-size: 12px;
-  margin-left: 5px;
-`;
-
 const VerticalLine = styled.div`
   position: absolute;
   top: 0;
@@ -381,3 +474,35 @@ const VerticalLine = styled.div`
   border-right: 1px solid #ccc;
 `;
 
+const FileMessage = styled.div`
+width: 250px;
+background-color: ${({ isMyMessage }) =>
+    isMyMessage ? "#DCF8C6" : "#F2F2F2"};
+padding: 8px;
+border-radius: 10px;
+margin-right: 5px;
+font-size: 14px;
+white-space: pre-wrap; // 줄바꿈을 지원하는 스타일 추가
+
+`;
+
+const FileName = styled.span`
+  font-size: 4px;
+  margin-right: 4px;
+`;
+
+const FileDownloadButton = styled.button`
+  padding: 4px 8px;
+  background-color: #7EAEF6;
+  border: none;
+  border-radius: 4px;
+  color: #333;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #999999;
+  }
+`;

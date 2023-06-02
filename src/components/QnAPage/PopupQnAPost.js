@@ -16,10 +16,55 @@ function PopupQnAPost({ qnapost, onClose }) {
     const [cmIds, setcmIds] = useState([]);
     const [comment, setComment] = useState('');
     const [position, setPosition] = useState(0);
-
     const [profileImageList, setProfileImageList] = useState([]);
+    const [liked, setLiked] = useState(false);
+    const [likedCount, setLikedCount] = useState('')
 
-    // const [showModal, setShowModal] = useState(false);
+
+    const getColorClass = (field) => {
+        switch (field) {
+            case '안드로이드':
+                return 'color-and';
+            case 'ios':
+                return 'color-ios';
+            case '알고리즘':
+                return 'color-algorithm';
+            case '데이터베이스':
+                return 'color-database';
+            case '운영체제':
+                return 'color-os';
+            case '서버':
+                return 'color-server';
+            case '웹':
+                return 'color-web';
+            case '머신러닝':
+                return 'color-ml';
+            default:
+                return '';
+        }
+    };
+
+
+    const handleLikeQnaPost = () => {
+        axios.put(`http://112.154.249.74:8080/qna/like/${qnapost.qnaId}`)
+            .then((response) => {
+                const liked = response.data.data.liked;
+                const updatedLikeCount = response.data.data.likeCount;
+    
+                setLiked(liked);
+                setQnaData(prevQnaData => ({
+                    ...prevQnaData,
+                    likeCount: updatedLikeCount
+                }));
+                console.log(response.data.data.liked);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
+    
+
+
 
     useEffect(() => {
         axios
@@ -27,49 +72,30 @@ function PopupQnAPost({ qnapost, onClose }) {
             .then((response) => {
                 const data = response.data.data;
                 const key1 = Object.keys(data)[0];
-                // const key2 = Object.keys(data)[0]
-                // console.log(key1);
-
                 const gcData = data[Role.COMMENT_GUEST]
 
                 const commentHostData = data.COMMENT_HOST ? data.COMMENT_HOST.map(item => {
-                    const { cocommentCount, comment, profileImagePath, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, role } = item;
-                    return { cocommentCount, comment, profileImagePath, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, role };
+                    const { cocommentCount, comment, profileImagePath, likeCount, liked, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, qnaId, role } = item;
+                    return { cocommentCount, comment, profileImagePath, likeCount, liked, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, qnaId, role };
                 }) : [];
                 const commentGuestData = data.COMMENT_GUEST ? data.COMMENT_GUEST.map(item => {
-                    const { cocommentCount, comment, profileImagePath, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, role } = item;
-                    return { cocommentCount, comment, profileImagePath, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, role };
+                    const { cocommentCount, comment, profileImagePath, likeCount, liked, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, qnaId, role } = item;
+                    return { cocommentCount, comment, profileImagePath, likeCount, liked, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, qnaId, role };
                 }) : [];
-
-                // const roleArray = [];
-
                 const commentAllData = commentHostData.concat(commentGuestData);
 
-                // for (let i = 0; i < commentAllData.length; i++) {
-                //     if (commentAllData[i].role === Role.COMMENT_HOST){
-                //         roleArray.push(Role.COMMENT_HOST);
-
-                //     } else if (commentAllData[i].role === Role.COMMENT_GUEST) {
-                //         roleArray.push(Role.COMMENT_GUEST);
-
-                //     }
-                //   }
                 if (key1 === Role.HOST) {
                     qnapost.type = key1;
                 } else if (key1 === Role.GUEST) {
                     qnapost.type = key1;
                 }
 
-                // qnapost.commentType = roleArray;
                 qnapost.commentData = commentAllData;
                 console.log(data);
-                // qnapost.hostComment = commentHostData;
-                // qnapost.guestComment = commentGuestData;
-
 
                 setQnaData(qnapost);
-                // setProfileImageList(qnapost.profileImagePath);
-                // console.log(qnapost.profileImagePath)
+                setLiked(qnapost.liked); // 추가된 코드
+
             })
             .catch((error) => {
                 console.log(error);
@@ -84,6 +110,9 @@ function PopupQnAPost({ qnapost, onClose }) {
             setContent(qnaData.content);
             setCurrentDateTime(qnaData.currentDateTime);
             setProfileImageList(qnaData.profileImagePath);
+            setLiked(qnaData.liked);
+            setLikedCount(qnaData.likeCount);
+            
 
         } else {
             setNickname('');
@@ -91,6 +120,9 @@ function PopupQnAPost({ qnapost, onClose }) {
             setContent('');
             setCurrentDateTime('');
             setProfileImageList('');
+            setLiked('');
+            setLikedCount('');
+
         }
         // console.log(qnaData);
     }, [qnaData]);
@@ -105,7 +137,6 @@ function PopupQnAPost({ qnapost, onClose }) {
         })
             .then((response) => {
                 // console.log(response.data);
-                // 성공적으로 댓글을 등록하면 화면을 갱신합니다.
                 setComment('');
                 setQnaData(response.data);
             })
@@ -152,72 +183,80 @@ function PopupQnAPost({ qnapost, onClose }) {
                     <PopupContainer>
                         {qnaData.type === Role.HOST && (
                             <>
-
-                                <img
-                                    className="profile-image"
-                                    src={"http://112.154.249.74:8080/" + qnapost.profileImagePath}
-                                    alt="게시글이미지"
-                                />
-                                <p>{qnaData.nickname}</p>
-
-                                <h2 className="mb-4">{qnaData.title}</h2>
-
-                                {qnaData.imagePath && ( //게시물 내용에 들어가는 사진
+                                <div className="qna-card-profile">
                                     <img
-                                        className="qna-card-image"
-                                        src={"http://112.154.249.74:8080/" + qnaData.imagePath}
+                                        className="profile-image"
+                                        src={"http://112.154.249.74:8080/" + qnapost.profileImagePath}
                                         alt="게시글이미지"
                                     />
-                                )}
-                                <p>{qnaData.content}</p>
-                                <button className="btn btn-danger me-3" onClick={handleDeleteQnaPost}>
-                                    삭제
-                                </button>
-                                <button className="btn btn-primary">수정</button>
+                                    <p>{qnaData.nickname}</p>
+                                </div>
+                                <h2 className="mb-4">{qnaData.title}</h2>
+                                <div onWheel={handleWheel}>
+                                    {qnaData.imagePath && ( //게시물 내용에 들어가는 사진
+                                        <img
+                                            className="qna-card-image"
+                                            src={"http://112.154.249.74:8080/" + qnaData.imagePath}
+                                            alt="게시글이미지"
+                                        />
+                                    )}
+                                    <p>{qnaData.content}</p>
+                                </div>
+                                <div className="qna-card-buttons">
+                                    <button className="btn btn-danger me-3" onClick={handleDeleteQnaPost}>
+                                        삭제
+                                    </button>
+                                    <button className="btn btn-primary">수정</button>
+                                </div>
+                                <div className="like-count-container">
+                                    <img
+                                        className="heart-icon"
+                                        src={`Images/logos/${qnapost.liked ? 'pinkheart' : 'heart'}.png`} // 변경된 코드
+                                        alt="하트 아이콘"
+                                        onClick={handleLikeQnaPost}
+                                    />
+                                    <p style={{ marginTop: '15px' }} className="like-count">{qnaData.likeCount}</p>
+                                </div>
                                 <hr />
-
-                                <CommentContainer key={qnaData.commentId} onWheel={handleWheel}>
+                                <CommentContainer onWheel={handleWheel}>
                                     {qnaData.commentData
                                         .sort((a, b) => a.commentId - b.commentId)
                                         .map((comment) => {
                                             if (comment.role === Role.COMMENT_GUEST) {
                                                 return (
-                                                    <>
-                                                        <p key={comment.commentId}>
-                                                            {comment.profileImagePath && (
-                                                                <img
-                                                                    className="profile-image"
-                                                                    src={"http://112.154.249.74:8080/" + comment.profileImagePath}
-                                                                    alt="게시글이미지"
-                                                                />
-                                                            )}
-                                                            {comment.nickname}: {comment.comment}
-                                                        </p>
-                                                    </>
+                                                    <p key={comment.commentId}>
+                                                        {comment.profileImagePath && (
+                                                            <img
+                                                                className="profile-image"
+                                                                src={"http://112.154.249.74:8080/" + comment.profileImagePath}
+                                                                alt="게시글이미지"
+                                                            />
+                                                        )}
+                                                        {comment.nickname}: {comment.comment}
+                                                    </p>
                                                 );
                                             } else if (comment.role === Role.COMMENT_HOST) {
                                                 return (
-                                                    <>
-                                                        <p key={comment.commentId}>
-                                                            {comment.profileImagePath && (
-                                                                <img
-                                                                    className="profile-image"
-                                                                    src={"http://112.154.249.74:8080/" + comment.profileImagePath}
-                                                                    alt="게시글이미지"
-                                                                />
-                                                            )}
-                                                            {comment.nickname}: {comment.comment}{" "}
-                                                            <button onClick={() => handleDeleteComment(comment.commentId)}>
-                                                                삭제
-                                                            </button>
-                                                        </p>
-                                                    </>
+                                                    <p key={comment.commentId}>
+                                                        {comment.profileImagePath && (
+                                                            <img
+                                                                className="profile-image"
+                                                                src={"http://112.154.249.74:8080/" + comment.profileImagePath}
+                                                                alt="게시글이미지"
+                                                            />
+                                                        )}
+                                                        {comment.nickname}: {comment.comment}{" "}
+                                                        <button onClick={() => handleDeleteComment(comment.commentId)}>
+                                                            삭제
+                                                        </button>
+                                                    </p>
                                                 );
                                             } else {
                                                 return null;
                                             }
                                         })}
                                 </CommentContainer>
+
 
                                 <form onSubmit={handleSubmit} className="mb-3">
                                     <div className="input-group">
@@ -238,12 +277,14 @@ function PopupQnAPost({ qnapost, onClose }) {
 
                         {qnaData.type === Role.GUEST && (
                             <>
-                                <img
-                                    className="profile-image"
-                                    src={"http://112.154.249.74:8080/" + qnapost.profileImagePath}
-                                    alt="게시글이미지"
-                                />
-                                <p>{qnaData.nickname}</p>
+                                <div className="qna-card-profile">
+                                    <img
+                                        className="profile-image"
+                                        src={"http://112.154.249.74:8080/" + qnapost.profileImagePath}
+                                        alt="게시글이미지"
+                                    />
+                                    <p>{qnaData.nickname}</p>
+                                </div>
                                 <h2 className="mb-4">{qnaData.title}</h2>
                                 {qnaData.imagePath && (
                                     <img
@@ -253,6 +294,15 @@ function PopupQnAPost({ qnapost, onClose }) {
                                     />
                                 )}
                                 <p>{qnaData.content}</p>
+                                <div className="like-count-container">
+                                    <img
+                                        className="heart-icon"
+                                        src={`Images/logos/${qnapost.liked ? 'pinkheart' : 'heart'}.png`}
+                                        alt="하트 아이콘"
+                                        onClick={handleLikeQnaPost}
+                                    />
+                                    <p style={{ marginTop: '15px' }} className="like-count">{qnaData.likeCount}</p>
+                                </div>
                                 <hr />
                                 <CommentContainer onWheel={handleWheel}>
                                     {qnaData.commentData
@@ -348,9 +398,11 @@ const PopupContainer = styled.div`
     margin-bottom: 20px;
   }
   .qna-card-image {
-    max-width: 100%;
-    max-height: 300px; /* 원하는 높이로 조절하세요 */
+    width: 450px;
+    max-height: 200px; /* 원하는 높이로 조절하세요 */
     object-fit: contain; /* 이미지 비율 유지를 위한 옵션입니다. 필요에 따라 변경할 수 있습니다. */
+    
+
   }
   .profile-image {
     width: 30px;
@@ -358,6 +410,26 @@ const PopupContainer = styled.div`
     border-radius: 50%;
     object-fit: cover;
     margin-right: 10px;
+  }
+  .qna-card-profile {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+  }
+  .heart-icon{
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+  .like-count-container{
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+  }
+  .qna-card-buttons{
+    display: flex;
+    justify-content: flex-end;
   }
 `;
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { AiOutlinePlusCircle } from 'react-icons/ai'
+import { AiOutlinePlusCircle } from 'react-icons/ai';
 import PopupQnAPost from './PopupQnAPost';
 
 const { localStorage } = window;
@@ -9,7 +9,7 @@ const { localStorage } = window;
 function QnAPanel() {
     const [position, setPosition] = useState(0);
     const [qnaIds, setqnaIds] = useState([]);
-    const [setQnAPosts] = useState([]);
+    const [qnAPost, setQnAPosts] = useState([]);
     const [showPopupCreat, setShowPopupCreat] = useState(false);
     const [nickname] = useState('');
     const [title, setTitle] = useState('');
@@ -22,6 +22,7 @@ function QnAPanel() {
     const [showQnAPost, setShowQnAPost] = useState(null);
 
     const [imageList, setImageList] = useState([]);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     const [profileImageList, setProfileImageList] = useState([]);
 
@@ -29,10 +30,9 @@ function QnAPanel() {
 
     const addQnAPost = () => {
         const newQnA = {
-            nickname,
             title,
             content,
-            currentDateTime
+            base64Image: selectedImage ? selectedImage.replace(/^data:image\/[a-z]+;base64,/, "") : null,
         };
 
         fetch('http://112.154.249.74:8080/qna/create', {
@@ -50,6 +50,19 @@ function QnAPanel() {
             .catch(error => console.error(error));
     }
 
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const imageData = reader.result;
+                setSelectedImage(imageData);
+                console.log(imageData);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const searchQnAPosts = () => {
         const keyword = searchText === '' ? null : searchText;
 
@@ -57,11 +70,10 @@ function QnAPanel() {
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
-                    const { commentCount, content, imagePath, profileImagePath, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
-                    return { commentCount, content, imagePath, profileImagePath, currentDateTime, modifiedDateTime, nickname, qnaId, title };
+                    const { commentCount, content, imagePath, profileImagePath, likeCount, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
+                    return { commentCount, content, imagePath, profileImagePath, likeCount, currentDateTime, modifiedDateTime, nickname, qnaId, title };
                 });
                 setSearchResult(qnaData);
-
             })
             .catch(error => console.error(error));
     }
@@ -81,56 +93,24 @@ function QnAPanel() {
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
-                    const { commentCount, content, imagePath, profileImagePath, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
-                    return { commentCount, content, imagePath, profileImagePath, currentDateTime, modifiedDateTime, nickname, qnaId, title };
+                    const { commentCount, content, imagePath, profileImagePath, likeCount, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
+                    return { commentCount, content, imagePath, profileImagePath, likeCount, currentDateTime, modifiedDateTime, nickname, qnaId, title };
                 });
-
-                // console.log(data);
+                console.log(data);
                 setqnaIds(qnaData);
                 setImageList(qnaData.map(item => item.imagePath));
                 setProfileImageList(qnaData.map(item => item.profileImagePath));
-                // console.log(qnaData.map(item => item.imagePath))
-                // console.log(data.data);
             })
             .catch(error => console.error(error));
-
-        console.log(currentTime)
-
     }, []);
-
-    const currentTime = new Date().toISOString();
-
-    const getTimeDiff = (currentTime, currentDateTime) => {
-        const currentTimeObject = new Date(currentTime);
-        const [date, time] = currentDateTime.split(" ");
-        const [day, month, year] = date.split("/");
-        const [hour, minute, second] = time.split(":");
-
-        // console.log(day, month, year, hour, minute, second); // 로그 추가
-
-        const postTimeObject = new Date(`20${year}`, month - 1, day, hour, minute, second);
-        // console.log(postTimeObject)
-        const diffInMs = currentTimeObject.getTime() - postTimeObject.getTime();
-        const diffInMin = Math.floor(Math.abs(diffInMs) / (1000 * 60));
-        const diffInHours = Math.floor(diffInMin / 60);
-        const diffInDays = Math.floor(diffInHours / 24); // 시간 단위를 기준으로 일 단위 계산
-
-        if (diffInMin < 60) {
-            return `${diffInMin}분 전`;
-        } else if (diffInHours < 24) {
-            return `${diffInHours}시간 전`;
-        } else {
-            return `${diffInDays}일 전`;
-        }
-    };
-
 
     return (
         <Div>
-            <Container>
+            <Div1>
                 <Posting onClick={() => setShowPopupCreat(true)}>
                     <AiOutlinePlusCircle />
                 </Posting>
+                <Label>Q&A 게시판</Label>
 
                 <SearchQnAFeed>
                     <input
@@ -143,7 +123,6 @@ function QnAPanel() {
                 </SearchQnAFeed>
 
                 {showPopupCreat && (
-                    //질문 글 포스팅
                     <PopupCreat>
                         <input
                             type="text"
@@ -156,6 +135,14 @@ function QnAPanel() {
                             onChange={e => setContent(e.target.value)}
                         />
                         <br />
+                        <input
+                            type="file"
+                            accept=".jpeg"
+                            id="photo_file"
+                            name="photo_file"
+                            onChange={handleImageChange}
+                        />
+                        <br />
                         <button onClick={() => setShowPopupCreat(false)}>Cancel</button>
                         <button
                             onClick={() => {
@@ -164,6 +151,7 @@ function QnAPanel() {
                                     setShowPopupCreat(false);
                                     setTitle('');
                                     setContent('');
+                                    setSelectedImage(null);
                                 } else {
                                     alert('빈칸을 채워 주세요.');
                                 }
@@ -173,7 +161,8 @@ function QnAPanel() {
                         </button>
                     </PopupCreat>
                 )}
-                <hr />
+            </Div1>
+            <Container>
                 <QnapostContainer onWheel={handleWheel}>
                     <QnAFeed>
                         <StyledQnAFeed>
@@ -187,7 +176,32 @@ function QnAPanel() {
                                                 )}
                                                 <p className="nickname">{item.nickname}</p>
                                             </div>
+                                            <li className="qna-post">
+                                                <div className="qna-card">
+                                                    <h2 className="qna-card-title">{item.title}</h2>
+                                                    <p className="qna-card-content">내용: {item.content}</p>
+                                                    <p className="qna-card-time">시간: {item.currentDateTime}</p>
+                                                    <div className="like-count-container">
+                                                        <img className="heart-icon" src="Images/logos/heart.png" alt="하트 아이콘" />
+                                                        <p className="like-count">{item.likeCount}</p>
+                                                        <img style={{marginLeft: '15px'}} className="heart-icon" src="Images/logos/coment.png" alt="댓글 아이콘" />
+                                                        <p style={{marginTop: '15px'}} className="like-count">{item.commentCount}</p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </QnAPost>
 
+
+                                    ))
+                                ) : (
+                                    qnaIds.map((item, index) => (
+                                        <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
+                                            <div className="qna-card-profile">
+                                                {item.profileImagePath && (
+                                                    <img className="profile-image" src={"http://112.154.249.74:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                                )}
+                                                <p className="nickname">{item.nickname}</p>
+                                            </div>
                                             <li className="qna-post">
                                                 <div className="qna-card">
                                                     <h2 className="qna-card-title">{item.title}</h2>
@@ -196,28 +210,14 @@ function QnAPanel() {
                                                     <p className="qna-card-time">
                                                         시간: {item.currentDateTime}
                                                     </p>
+                                                    <div className="like-count-container">
+                                                        <img className="heart-icon" src="Images/logos/heart.png" alt="하트 아이콘" />
+                                                        <p style={{marginTop: '15px'}} className="like-count">{item.likeCount}</p>
+                                                        <img style={{marginLeft: '15px'}} className="heart-icon" src="Images/logos/coment.png" alt="댓글 아이콘" />
+                                                        <p style={{marginTop: '15px'}} className="like-count">{item.commentCount}</p>
 
-                                                </div>
-                                            </li>
-                                        </QnAPost>
-                                    ))
-                                ) : (
-                                    qnaIds.map((item, index) => (
-                                        <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
-                                            <div className="qna-card-profile">
-                                            {item.profileImagePath && (
-                                                <img className="profile-image" src={"http://112.154.249.74:8080/" + item.profileImagePath} alt="프로필 이미지" />
-                                            )}
-                                            <p className="nickname">{item.nickname}</p>
-                                        </div>
-                                            <li className="qna-post">
-                                                <div className="qna-card">
-                                                    <h2 className="qna-card-title">{item.title}</h2>
 
-                                                    <p className="qna-card-content">내용: {item.content}</p>
-                                                    <p className="qna-card-time">
-                                                    시간: {item.currentDateTime}
-                                                    </p>
+                                                    </div>
                                                 </div>
                                             </li>
                                         </QnAPost>
@@ -233,20 +233,26 @@ function QnAPanel() {
                 </QnapostContainer>
             </Container>
         </Div>
-    )
+    );
 }
-export default QnAPanel
+
+export default QnAPanel;
+
 
 {/* <div className="rounded-circle profile-img mr-3">👤</div> */ }
 
 const Div = styled.div`
 height:100%;
-background-color: #CFDCFF;
+`;
+const Div1 = styled.div`
+background-color: #2F4074;
+padding-bottom:20px;
+
 `;
 
 const Container = styled.div`
-height: auto;
-background-color: #CFDCFF;
+height: 100%;
+background-color: white;
 
 `;
 const QnAFeed = styled.div`
@@ -261,7 +267,7 @@ padding-top: 20px;
 const QnAPost = styled.div`
   border: 1px solid #ddd;
   padding: 20px;
-  width: 500px;
+  width: 650px;
   height: auto;
   margin: 10px;
   background-color: #F3F8FF;
@@ -296,15 +302,25 @@ const QnAPost = styled.div`
     max-height: 300px; /* 원하는 높이로 조절하세요 */
     object-fit: contain; /* 이미지 비율 유지를 위한 옵션입니다. 필요에 따라 변경할 수 있습니다. */
   }
+  .heart-icon{
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+  .like-count-container{
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+  }
 `;
 
 const Posting = styled.div`
-  float: right;
-  font-size: 40px;
-  cursor: pointer;
-  position: fixed;
-  margin-left: 20px;
-  margin-top: 3px;
+font-size: 40px;
+cursor: pointer;
+position: fixed;
+margin: 25px;
+top: 130px;
 
 `;
 const PopupCreat = styled.div`
@@ -314,7 +330,7 @@ alignItems: center;
 justifyContent: center;
   position: fixed;
   width:700px;
-  height:auto;
+  height:500px;
   top: 50%;
   left: 30%;
   transform: translate(0%, -50%);
@@ -372,4 +388,13 @@ const StyledQnAFeed = styled.div`
     font-size: 0.8rem;
     color: gray;
   }
+`;
+const Label = styled.label`
+    display:flex;
+  font-size: 30px;
+  padding-top: 30px;
+  margin-bottom: 0.5rem;
+  margin-left: 360px;
+  color: white;
+  font-weight: bolder;
 `;

@@ -18,10 +18,6 @@ function MainPage () {
                 <MiddlePanel />
             </Middle>
 
-            <SideRight>
-                <RightSidePanel/>
-            </SideRight>
-
         </Container>
 
     )
@@ -36,7 +32,7 @@ const Container = styled.div`
 `;
 
 const SideLeft = styled.div`
-width: 300px; /* sidepanel의 너비 조절 */
+width: 30%; /* sidepanel의 너비 조절 */
 height: 100%; /* sidepanel의 높이 조절 */
 position: fixed; /* 화면에서 고정 위치 */
 top: 0; /* 화면 상단에 위치 */
@@ -45,7 +41,7 @@ background-color: #fff; /* 배경색상 조절 */
 `;
 
 const Middle = styled.div`
-width: 60%; /* sidepanel의 너비 조절 */
+width: 80%; /* sidepanel의 너비 조절 */
 height: 100%; /* sidepanel의 높이 조절 */
 position: fixed; /* 화면에서 고정 위치 */
 top: 0; /* 화면 상단에 위치 */
