@@ -181,7 +181,7 @@ function RegisterPage() {
             <Label htmlFor="field">관심 분야</Label>
 
             <RadioContainer>
-              <input
+              <FieldInput
                 type="checkbox"
                 id="안드로이드"
                 name="fieldList"
@@ -192,7 +192,7 @@ function RegisterPage() {
               />
               <RadioLabel htmlFor="Android">안드로이드</RadioLabel>
 
-              <input
+              <FieldInput
                 type="checkbox"
                 id="운영체제"
                 name="fieldList"
@@ -203,7 +203,7 @@ function RegisterPage() {
               />
               <RadioLabel htmlFor="OS">운영체제</RadioLabel>
 
-              <input
+              <FieldInput
                 type="checkbox"
                 id="ios"
                 name="fieldList"
@@ -214,7 +214,7 @@ function RegisterPage() {
               />
               <RadioLabel htmlFor='IOS'>ios</RadioLabel>
 
-              <input
+              <FieldInput
                 type="checkbox"
                 id="알고리즘"
                 name="fieldList"
@@ -225,7 +225,7 @@ function RegisterPage() {
               />
               <RadioLabel htmlFor='Algorism'>알고리즘</RadioLabel>
 
-              <input
+              <FieldInput
                 type="checkbox"
                 id="서버"
                 name="fieldList"
@@ -236,7 +236,7 @@ function RegisterPage() {
               />
               <RadioLabel htmlFor='Server'>서버</RadioLabel>
 
-              <input
+              <FieldInput
                 type="checkbox"
                 id="웹"
                 name="fieldList"
@@ -247,7 +247,7 @@ function RegisterPage() {
               />
               <RadioLabel htmlFor='Web'>웹</RadioLabel>
 
-              <input
+              <FieldInput
                 type="checkbox"
                 id="머신러닝"
                 name="fieldList"
@@ -258,6 +258,26 @@ function RegisterPage() {
               />
 
               <RadioLabel htmlFor='machine learning'>머신러닝</RadioLabel>
+              <FieldInput
+                type="checkbox"
+                id="데이터베이스"
+                name="fieldList"
+                value="데이터베이스"
+                onChange={handleChange}
+
+              // checked={formValues.fieldList.includes('Web')}
+              />
+              <RadioLabel htmlFor='Web'>데이터베이스</RadioLabel>
+              <FieldInput
+                type="checkbox"
+                id="기타"
+                name="fieldList"
+                value="기타"
+                onChange={handleChange}
+
+              // checked={formValues.fieldList.includes('Web')}
+              />
+              <RadioLabel htmlFor='Web'>기타</RadioLabel>
 
             </RadioContainer>
             {errors.fieldList && <span>{errors.fieldList}</span>}
@@ -414,13 +434,17 @@ const RadioContainer = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 1rem;
+  width: 1000px;
 `;
 
 const RadioLabel = styled.label`
-  margin-right: 0.5rem;
+  margin-right: 1rem;
   font-size: 20px;
-  display:flex;
-  flex-direction: row;
-  color:gray;
+  display: flex;
+  align-items: center;
+  color: gray;
 `;
 
+const FieldInput = styled.input`
+  margin-right: 0.5rem;
+`;

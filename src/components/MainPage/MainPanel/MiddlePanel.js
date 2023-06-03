@@ -31,8 +31,26 @@ function MiddlePanel() {
   const [errors, setErrors] = useState({});
   const [selectedValue, setSelectedValue] = useState('');
   const [formValues, setFormValues] = useState("")
+  const [selectedField, setSelectedField] = useState("");
 
   const [myaddress, setmyaddress] = useState(null);
+
+  const fields = ["안드로이드", "운영체제", "ios", "알고리즘", "서버", "웹", "머신러닝", "데이터베이스", "기타"];
+
+
+  const handleCreate = () => {
+    if (title && content && count && selectedField) {
+      // Add logic for creating a new post
+      addPost();
+      setShowPopupCreat(false);
+      setTitle("");
+      setContent("");
+      setCount("");
+      setSelectedField("");
+    } else {
+      alert("빈칸을 채워 주세요.");
+    }
+  };
 
   const getColorClass = (field) => {
     switch (field) {
@@ -56,9 +74,6 @@ function MiddlePanel() {
         return '';
     }
   };
-
-
-
 
   function handlePostClick(post) {
     setSelectedPost(post);
@@ -224,28 +239,31 @@ function MiddlePanel() {
       </Container>
 
       <Container1 style={{ overflowY: 'scroll', height: '75%' }} onWheel={handleWheel}>
-        {showPopupCreat && (
-          <PopupCreat>
-            <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} /><br />
-            <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)} /><br />
-            <input type="text" placeholder="총 인원수를 설정하세요." onChange={(e) => setCount(e.target.value)} /><br />
-            <input type="text" placeholder="관심분야를 입력하세요." onChange={(e) => setField(e.target.value)} /><br />
-            <button onClick={() => setShowPopupCreat(false)}>Cancel</button>
-            <button onClick={() => {
-              if (title && content && count && field) {
-                // Add logic for creating a new post
-                addPost();
-                setShowPopupCreat(false);
-                setTitle("");
-                setContent("");
-                setCount("");
-                setField("");
-              } else {
-                alert("빈칸을 채워 주세요.");
-              }
-            }}>Create</button>
-          </PopupCreat>
-        )}
+      {showPopupCreat && (
+        <PopupCreat>
+          <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} /><br />
+          <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)} /><br />
+          <input type="text" placeholder="총 인원수를 설정하세요." onChange={(e) => setCount(e.target.value)} /><br />
+          <p>관심분야를 선택하세요:</p>
+          {fields.map((field) => (
+            <label key={field}>
+              <input
+                type="radio"
+                name="field"
+                value={field}
+                checked={selectedField === field}
+                onChange={(e) => setSelectedField(e.target.value)}
+              />
+              {field}
+            </label>
+          ))}
+          <br />
+          <button onClick={() => setShowPopupCreat(false)}>Cancel</button>
+          <button onClick={handleCreate}>Create</button>
+        </PopupCreat>
+      )}
+  
+
         <Feed>
           <ul className="list-unstyled">
             {searchTerm ? // 검색어가 입력되어 있다면 검색 결과 목록을 보여줌
