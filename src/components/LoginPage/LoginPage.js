@@ -68,7 +68,7 @@ function LoginPage() {
     // Navigate to the login page
     navigate('/login');
   };
-
+  
   return (
     <FormContainer onSubmit={handleSubmit}>
       <FormBackgroundImage />
