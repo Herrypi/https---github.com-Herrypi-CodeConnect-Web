@@ -8,7 +8,7 @@ import { login } from '../../redux/actions/userActions';
 
 function RegisterPage() {
   const dispatch = useDispatch();
-  const BASE_URL = "http://112.154.249.74:8080/members/signup";
+  const BASE_URL = "http://13.124.68.20:8080/members/signup";
 
   const [formValues, setFormValues] = useState({
     email: "",

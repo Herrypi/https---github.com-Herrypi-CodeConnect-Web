@@ -112,7 +112,7 @@ function MiddlePanel() {
       currentCount,
     };
 
-    fetch('http://112.154.249.74:8080/recruitments/create', {
+    fetch('http://13.124.68.20:8080/recruitments/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ function MiddlePanel() {
   };
 
   useEffect(() => {
-    axios.get(`http://112.154.249.74:8080/recruitments/main`)
+    axios.get(`http://13.124.68.20:8080/recruitments/main`)
       .then(response => {
         const data = response.data;
         const recruitmentData = data.data.map(item => {//recruitmentData 안에 게시물 정보 다 저장하기
@@ -146,7 +146,7 @@ function MiddlePanel() {
 
     const addressKeyword = selectedValue === '' ? null : selectedValue;
 
-    axios.get(`http://112.154.249.74:8080/recruitments/main?address=${addressKeyword}`)
+    axios.get(`http://13.124.68.20:8080/recruitments/main?address=${addressKeyword}`)
       .then(response => {
         const data = response.data;
         const recruitmentData = data.data.map(item => {//recruitmentData 안에 게시물 정보 다 저장하기
@@ -164,7 +164,7 @@ function MiddlePanel() {
 
   useEffect(() => {
     if (searchTerm) {
-      axios.get(`http://112.154.249.74:8080/recruitments/search?keyword=${searchTerm}`)
+      axios.get(`http://13.124.68.20:8080/recruitments/search?keyword=${searchTerm}`)
         .then(response => {
           const data = response.data;
           console.log(data)
@@ -273,7 +273,7 @@ function MiddlePanel() {
                   <Post key={item.recruitmentId} onClick={() => handlePostClick(item)}>
                     <li style={{ position: 'relative' }}>
                       <div className="qna-card-profile">
-                        <img className="profile-image" src={"http://112.154.249.74:8080/" + item.profileImagePath} />
+                        <img className="profile-image" src={"http://13.124.68.20:8080/" + item.profileImagePath} />
                         <p className="nickname">{item.nickname}</p>
                       </div>
                       <h2>{item.title.replace(/\n/g, '\n')}</h2>
@@ -320,7 +320,7 @@ function MiddlePanel() {
                   <Post key={item.recruitmentId} onClick={() => handlePostClick(item)}>
                     <li style={{ position: 'relative' }}>
                       <div className="qna-card-profile">
-                        <img className="profile-image" src={"http://112.154.249.74:8080/" + item.profileImagePath} />
+                        <img className="profile-image" src={"http://13.124.68.20:8080/" + item.profileImagePath} />
                         <p className="nickname">{item.nickname}</p>
                       </div>
                       <h2>{item.title.replace(/\n/g, '\n')}</h2>

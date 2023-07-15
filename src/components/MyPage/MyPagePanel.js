@@ -122,7 +122,7 @@ function MyPagePanel() {
     useEffect(() => {
 
         axios
-            .get(`http://112.154.249.74:8080/profile/myinfo`, {
+            .get(`http://13.124.68.20:8080/profile/myinfo`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -147,7 +147,7 @@ function MyPagePanel() {
 
     useEffect(() => {
         axios
-            .get(`http://112.154.249.74:8080/profile/userRecruitment/${nickname}`)
+            .get(`http://13.124.68.20:8080/profile/userRecruitment/${nickname}`)
             .then((response) => {
                 const data = response.data;
 
@@ -165,7 +165,7 @@ function MyPagePanel() {
 
     useEffect(() => {
         axios
-            .get(`http://112.154.249.74:8080/profile/userQna/${nickname}`)
+            .get(`http://13.124.68.20:8080/profile/userQna/${nickname}`)
             .then((response) => {
                 const data = response.data;
                 console.log(data);
@@ -182,7 +182,7 @@ function MyPagePanel() {
     }, [nickname]);
 
     useEffect(() => {
-        axios.get(`http://112.154.249.74:8080/profile/${nickname}`)
+        axios.get(`http://13.124.68.20:8080/profile/${nickname}`)
             .then((response) => {
                 const data = response.data;
                 console.log(data);
@@ -254,7 +254,7 @@ function MyPagePanel() {
         };
 
         axios
-            .put("http://112.154.249.74:8080/profile/update", updateProfile)
+            .put("http://13.124.68.20:8080/profile/update", updateProfile)
             .then((response) => {
                 console.log(response.data);
                 console.log(updateProfile);
@@ -278,7 +278,7 @@ function MyPagePanel() {
                         <Profile>
                             <img
                                 className="profile-image"
-                                src={"http://112.154.249.74:8080/" + myInfo.profileImagePath}
+                                src={"http://13.124.68.20:8080/" + myInfo.profileImagePath}
                                 alt="Profile"
                             />
                             <Button variant="secondary" onClick={openEditProfileModal}>
@@ -380,7 +380,7 @@ function MyPagePanel() {
                                             <div className="post-item" onClick={() => openPostModal(post)}>
                                                 <div className="post-title">{post.title}</div>
                                                 {post.imagePath && (
-                                                    <img className="post-image" src={"http://112.154.249.74:8080/" + post.imagePath} />
+                                                    <img className="post-image" src={"http://13.124.68.20:8080/" + post.imagePath} />
                                                 )}
                                                 {!post.imagePath && (
                                                     <div className="post-content">{post.content}</div>

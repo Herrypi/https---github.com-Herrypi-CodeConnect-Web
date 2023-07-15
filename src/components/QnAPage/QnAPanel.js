@@ -35,7 +35,7 @@ function QnAPanel() {
             base64Image: selectedImage ? selectedImage.replace(/^data:image\/[a-z]+;base64,/, "") : null,
         };
 
-        fetch('http://112.154.249.74:8080/qna/create', {
+        fetch('http://13.124.68.20:8080/qna/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ function QnAPanel() {
     const searchQnAPosts = () => {
         const keyword = searchText === '' ? null : searchText;
 
-        axios.get(`http://112.154.249.74:8080/qna/search/${keyword}`)
+        axios.get(`http://13.124.68.20:8080/qna/search/${keyword}`)
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
@@ -89,7 +89,7 @@ function QnAPanel() {
     }
 
     useEffect(() => {
-        axios.get('http://112.154.249.74:8080/qna/list')
+        axios.get('http://13.124.68.20:8080/qna/list')
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
@@ -172,7 +172,7 @@ function QnAPanel() {
                                         <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
                                             <div className="qna-card-profile">
                                                 {item.profileImagePath && (
-                                                    <img className="profile-image" src={"http://112.154.249.74:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                                    <img className="profile-image" src={"http://13.124.68.20:8080/" + item.profileImagePath} alt="프로필 이미지" />
                                                 )}
                                                 <p className="nickname">{item.nickname}</p>
                                             </div>
@@ -198,7 +198,7 @@ function QnAPanel() {
                                         <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
                                             <div className="qna-card-profile">
                                                 {item.profileImagePath && (
-                                                    <img className="profile-image" src={"http://112.154.249.74:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                                    <img className="profile-image" src={"http://13.124.68.20:8080/" + item.profileImagePath} alt="프로필 이미지" />
                                                 )}
                                                 <p className="nickname">{item.nickname}</p>
                                             </div>

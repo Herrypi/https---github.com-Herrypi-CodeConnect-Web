@@ -13,7 +13,7 @@ function RightSidePanel() {
   }
 
   useEffect(() => {
-    axios.get(`http://112.154.249.74:8080/qna/popular`)
+    axios.get(`http://13.124.68.20:8080/qna/popular`)
       .then((response) => {
         const data = response.data
         console.log(data)
@@ -37,7 +37,7 @@ function RightSidePanel() {
         {popularPosts.map((post) => (
           <PostItem key={post.qnaId} onClick={() => handlePostClick(post)}>
             <div className="qna-card-profile">
-              <img className="profile-image" src={"http://112.154.249.74:8080/" + post.profileImagePath} alt="프로필 이미지" />
+              <img className="profile-image" src={"http://13.124.68.20:8080/" + post.profileImagePath} alt="프로필 이미지" />
               <p style={{ marginTop: '15px' }} className="nickname">{post.nickname}</p>
             </div>
             <h2 className='qna-card-title'>{post.title}</h2>

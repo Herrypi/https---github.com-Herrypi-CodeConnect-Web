@@ -52,7 +52,7 @@ function PopupPost({ post, onClose }) {
     const token = localStorage.getItem('token');
     axios
       .put(
-        `http://112.154.249.74:8080/recruitments/participate/${post.recruitmentId}?isParticipating=true`,
+        `http://13.124.68.20:8080/recruitments/participate/${post.recruitmentId}?isParticipating=true`,
         {},
         {
           headers: {
@@ -78,7 +78,7 @@ function PopupPost({ post, onClose }) {
     const token = localStorage.getItem('token');
     axios
       .put(
-        `http://112.154.249.74:8080/recruitments/participate/${post.recruitmentId}?isParticipating=false`,
+        `http://13.124.68.20:8080/recruitments/participate/${post.recruitmentId}?isParticipating=false`,
         {},
         {
           headers: {
@@ -97,7 +97,7 @@ function PopupPost({ post, onClose }) {
 
   const handleDeletePost = () => {
     axios
-      .delete(`http://112.154.249.74:8080/recruitments/delete/${post.recruitmentId}`)
+      .delete(`http://13.124.68.20:8080/recruitments/delete/${post.recruitmentId}`)
       .then((response) => {
         onClose();
         console.log(response.data);
@@ -115,7 +115,7 @@ function PopupPost({ post, onClose }) {
       field: field || popupData.field,
     };
     axios
-      .put(`http://112.154.249.74:8080/recruitments/update/${post.recruitmentId}`, updatedPost)
+      .put(`http://13.124.68.20:8080/recruitments/update/${post.recruitmentId}`, updatedPost)
       .then((response) => {
         setPopupData(response.data);
         console.log(response.data);
@@ -128,7 +128,7 @@ function PopupPost({ post, onClose }) {
 
   useEffect(() => {
     axios
-      .get(`http://112.154.249.74:8080/recruitments/${post.recruitmentId}`)
+      .get(`http://13.124.68.20:8080/recruitments/${post.recruitmentId}`)
       .then((response) => {
         const data = response.data.data;
         const participationData = data[Role.PARTICIPATION];

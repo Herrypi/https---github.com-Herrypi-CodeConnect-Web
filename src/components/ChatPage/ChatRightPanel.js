@@ -41,7 +41,7 @@ const ChatRightPanel = ({ chatPersonList, chatTodoList, liveChatTodoList }) => {
       <UserList>
         {personList && personList.map((item) => (
           <UserContainer key={item.id}>
-            <ProfileImage src={"http://112.154.249.74:8080/" + item.imagePath} />
+            <ProfileImage src={"http://13.124.68.20:8080/" + item.imagePath} />
             <ProfileName>{item.nickname}</ProfileName>
           </UserContainer>
         ))}

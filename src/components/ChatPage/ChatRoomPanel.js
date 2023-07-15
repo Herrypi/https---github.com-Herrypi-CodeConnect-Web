@@ -12,7 +12,7 @@ function ChatRoomPanel() {
 
   useEffect(() => {
     axios
-      .get("http://112.154.249.74:8080/chatRoom/list")
+      .get("http://13.124.68.20:8080/chatRoom/list")
       .then((response) => {
         const data = response.data;
         const chatRoomData = data.data.map((item) => {
