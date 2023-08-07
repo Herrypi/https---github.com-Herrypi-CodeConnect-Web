@@ -26,7 +26,13 @@ function QnAPanel() {
 
     const [profileImageList, setProfileImageList] = useState([]);
 
-    const token = localStorage.getItem('token');
+    const accessToken = localStorage.getItem('accessToken');
+
+    const config = {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    };
 
     const addQnAPost = () => {
         const newQnA = {
@@ -35,12 +41,9 @@ function QnAPanel() {
             base64Image: selectedImage ? selectedImage.replace(/^data:image\/[a-z]+;base64,/, "") : null,
         };
 
-        fetch('http://13.124.68.20:8080/qna/create', {
+        fetch('http://52.79.53.62:8080/qna/create', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            config,
             body: JSON.stringify(newQnA)
         })
             .then(response => response.json())
@@ -66,7 +69,8 @@ function QnAPanel() {
     const searchQnAPosts = () => {
         const keyword = searchText === '' ? null : searchText;
 
-        axios.get(`http://13.124.68.20:8080/qna/search/${keyword}`)
+
+        axios.get(`http://52.79.53.62:8080/qna/search/${keyword}`, config)
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
@@ -89,7 +93,7 @@ function QnAPanel() {
     }
 
     useEffect(() => {
-        axios.get('http://13.124.68.20:8080/qna/list')
+        axios.get('http://52.79.53.62:8080/qna/list', config)
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
@@ -172,7 +176,7 @@ function QnAPanel() {
                                         <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
                                             <div className="qna-card-profile">
                                                 {item.profileImagePath && (
-                                                    <img className="profile-image" src={"http://13.124.68.20:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                                    <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath} alt="프로필 이미지" />
                                                 )}
                                                 <p className="nickname">{item.nickname}</p>
                                             </div>
@@ -184,8 +188,8 @@ function QnAPanel() {
                                                     <div className="like-count-container">
                                                         <img className="heart-icon" src="Images/logos/heart.png" alt="하트 아이콘" />
                                                         <p className="like-count">{item.likeCount}</p>
-                                                        <img style={{marginLeft: '15px'}} className="heart-icon" src="Images/logos/coment.png" alt="댓글 아이콘" />
-                                                        <p style={{marginTop: '15px'}} className="like-count">{item.commentCount}</p>
+                                                        <img style={{ marginLeft: '15px' }} className="heart-icon" src="Images/logos/coment.png" alt="댓글 아이콘" />
+                                                        <p style={{ marginTop: '15px' }} className="like-count">{item.commentCount}</p>
                                                     </div>
                                                 </div>
                                             </li>
@@ -198,7 +202,7 @@ function QnAPanel() {
                                         <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
                                             <div className="qna-card-profile">
                                                 {item.profileImagePath && (
-                                                    <img className="profile-image" src={"http://13.124.68.20:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                                    <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath} alt="프로필 이미지" />
                                                 )}
                                                 <p className="nickname">{item.nickname}</p>
                                             </div>
@@ -212,9 +216,9 @@ function QnAPanel() {
                                                     </p>
                                                     <div className="like-count-container">
                                                         <img className="heart-icon" src="Images/logos/heart.png" alt="하트 아이콘" />
-                                                        <p style={{marginTop: '15px'}} className="like-count">{item.likeCount}</p>
-                                                        <img style={{marginLeft: '15px'}} className="heart-icon" src="Images/logos/coment.png" alt="댓글 아이콘" />
-                                                        <p style={{marginTop: '15px'}} className="like-count">{item.commentCount}</p>
+                                                        <p style={{ marginTop: '15px' }} className="like-count">{item.likeCount}</p>
+                                                        <img style={{ marginLeft: '15px' }} className="heart-icon" src="Images/logos/coment.png" alt="댓글 아이콘" />
+                                                        <p style={{ marginTop: '15px' }} className="like-count">{item.commentCount}</p>
 
 
                                                     </div>

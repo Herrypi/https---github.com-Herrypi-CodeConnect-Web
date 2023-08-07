@@ -11,7 +11,7 @@ const { localStorage } = window;
 
 function LoginPage() {
   const dispatch = useDispatch();
-  const BASE_URL = 'http://13.124.68.20:8080/members/login';
+  const BASE_URL = 'http://52.79.53.62:8080/members/login';
   const [formValues, setFormValues] = useState({
     email: '',
     password: '',
@@ -38,14 +38,18 @@ function LoginPage() {
       .then((response) => {
         const responseData = response.data;
         const { token, exprTime, nickname, fieldList, address } = responseData.data;
+        const {accessToken, refreshToken} = token
+        console.log(accessToken)
+        console.log(exprTime);
 
         if (response.status === 200) {
-          // Save the token in localStorage
-          localStorage.setItem('token', token);
+          // Save the accessToken in localStorage
+          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
           localStorage.setItem('expiryDate', exprTime);
 
           // Set Authorization header for all axios requests
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
           // Dispatch login action to update user state
           dispatch(setNickname(nickname));
@@ -61,8 +65,8 @@ function LoginPage() {
   };
 
   const handleLogout = () => {
-    // Remove the token from localStorage
-    localStorage.removeItem('token');
+    // Remove the accessToken from localStorage
+    localStorage.removeItem('accessToken');
     // Dispatch the logout action to clear the user state
     dispatch(logout());
     // Navigate to the login page

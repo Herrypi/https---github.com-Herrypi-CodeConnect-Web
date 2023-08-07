@@ -8,7 +8,7 @@ import { login } from '../../redux/actions/userActions';
 
 function RegisterPage() {
   const dispatch = useDispatch();
-  const BASE_URL = "http://13.124.68.20:8080/members/signup";
+  const BASE_URL = "http://52.79.53.62:8080/members/signup";
 
   const [formValues, setFormValues] = useState({
     email: "",
@@ -32,7 +32,7 @@ function RegisterPage() {
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_ADEMD_INFO&key=D3D9E0D0-062C-35F0-A49D-FC9E863B3AD5&format=json&geometry=false&attrFilter=emd_kor_nm:like:${encodeURIComponent(dong)}`);
+      const response = await fetch(`http://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_ADEMD_INFO&key=8E78F586-DBB3-36C9-9FF5-E7B652FBA77D&format=json&geometry=false&attrFilter=emd_kor_nm:like:${encodeURIComponent(dong)}`);
       const data = await response.json();
       if (data && data.response && data.response.result && data.response.result.featureCollection) {
         setResults(data.response.result.featureCollection.features);

@@ -40,29 +40,31 @@ function MyPagePanel() {
         // ...
     });
 
+    
+
     const getColorClass = (field) => {
         switch (field) {
-          case '안드로이드':
-            return 'color-and';
-          case 'ios':
-            return 'color-ios';
-          case '알고리즘':
-            return 'color-algorithm';
-          case '데이터베이스':
-            return 'color-database';
-          case '운영체제':
-            return 'color-os';
-          case '서버':
-            return 'color-server';
-          case '웹':
-            return 'color-web';
-          case '머신러닝':
-            return 'color-ml';
-          default:
-            return '';
+            case '안드로이드':
+                return 'color-and';
+            case 'ios':
+                return 'color-ios';
+            case '알고리즘':
+                return 'color-algorithm';
+            case '데이터베이스':
+                return 'color-database';
+            case '운영체제':
+                return 'color-os';
+            case '서버':
+                return 'color-server';
+            case '웹':
+                return 'color-web';
+            case '머신러닝':
+                return 'color-ml';
+            default:
+                return '';
         }
-      };
-      
+    };
+
 
     const [result, setResults] = useState([]);
     const [dong, setDong] = useState("");
@@ -72,12 +74,19 @@ function MyPagePanel() {
         setSelectedCategory(category);
     };
 
-    const token = localStorage.getItem("token");
+    const accessToken = localStorage.getItem("accessToken");
 
     const [nickname, setNickname] = useState("");
     const [myPosts, setMyPosts] = useState([]);
     const [myQna, setMyQna] = useState([]);
     const [myJoin, setMyJoin] = useState([]);
+
+    //config는 헤더에 토큰을 추가하는 방법
+    const config = {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    };
 
     let currentPosts;
 
@@ -105,7 +114,7 @@ function MyPagePanel() {
     const handleSearch = async () => {
         try {
             const response = await fetch(
-                `http://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_ADEMD_INFO&key=D3D9E0D0-062C-35F0-A49D-FC9E863B3AD5&format=json&geometry=false&attrFilter=emd_kor_nm:like:${newAddress}`
+                `http://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_ADEMD_INFO&key=8E78F586-DBB3-36C9-9FF5-E7B652FBA77D&format=json&geometry=false&attrFilter=emd_kor_nm:like:${newAddress}`
             );
             const data = await response.json();
             console.log(data)
@@ -122,15 +131,15 @@ function MyPagePanel() {
     useEffect(() => {
 
         axios
-            .get(`http://13.124.68.20:8080/profile/myinfo`, {
+            .get(`http://52.79.53.62:8080/profile/myinfo`, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${accessToken}`,
                 },
             })
             .then((response) => {
                 const data = response.data.data;
                 console.log(data);
-
+                console.log(accessToken)
                 const infodata = {
                     // email: data.email,
                     nickname: data.nickname,
@@ -147,7 +156,7 @@ function MyPagePanel() {
 
     useEffect(() => {
         axios
-            .get(`http://13.124.68.20:8080/profile/userRecruitment/${nickname}`)
+            .get(`http://52.79.53.62:8080/profile/userRecruitment/${nickname}`,{config})
             .then((response) => {
                 const data = response.data;
 
@@ -165,7 +174,7 @@ function MyPagePanel() {
 
     useEffect(() => {
         axios
-            .get(`http://13.124.68.20:8080/profile/userQna/${nickname}`)
+            .get(`http://52.79.53.62:8080/profile/userQna/${nickname}`,{config})
             .then((response) => {
                 const data = response.data;
                 console.log(data);
@@ -182,7 +191,7 @@ function MyPagePanel() {
     }, [nickname]);
 
     useEffect(() => {
-        axios.get(`http://13.124.68.20:8080/profile/${nickname}`)
+        axios.get(`http://52.79.53.62:8080/profile/${nickname}`, {config})
             .then((response) => {
                 const data = response.data;
                 console.log(data);
@@ -254,7 +263,7 @@ function MyPagePanel() {
         };
 
         axios
-            .put("http://13.124.68.20:8080/profile/update", updateProfile)
+            .put("http://52.79.53.62:8080/profile/update", updateProfile, config)
             .then((response) => {
                 console.log(response.data);
                 console.log(updateProfile);
@@ -270,15 +279,15 @@ function MyPagePanel() {
 
 
     return (
-        <Div style={{ overflowY: 'scroll', height: '100%', backgroundColor:'#F3F6FF' }} onWheel={handleWheel}>
+        <Div style={{ overflowY: 'scroll', height: '100%', backgroundColor: '#F3F6FF' }} onWheel={handleWheel}>
             <Container >
-                
+
                 <Row >
                     <Col md={4}>
                         <Profile>
                             <img
                                 className="profile-image"
-                                src={"http://13.124.68.20:8080/" + myInfo.profileImagePath}
+                                src={"http://52.79.53.62:8080/" + myInfo.profileImagePath}
                                 alt="Profile"
                             />
                             <Button variant="secondary" onClick={openEditProfileModal}>
@@ -298,36 +307,36 @@ function MyPagePanel() {
 
                             <Form.Group>
                                 <Info>
-                                {myInfo && myInfo.fieldList && Array.isArray(myInfo.fieldList) && (
-                                    <Form.Label>
-                                        관심분야
-                                        <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                            {myInfo.fieldList.map((field, index) => (
-                                                <div
-                                                    key={index}
-                                                    className={`${getColorClass(field)} field-item`}
-                                                    style={{
-                                                        border: '1px solid black',
-                                                        borderRadius: '40px',
-                                                        padding: '8px',
-                                                        marginRight: '8px',
-                                                        width: 'auto'
-                            
-                                                      }}
-                                                >
-                                                    {field}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </Form.Label>
-                                )}</Info>
+                                    {myInfo && myInfo.fieldList && Array.isArray(myInfo.fieldList) && (
+                                        <Form.Label>
+                                            관심분야
+                                            <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                                {myInfo.fieldList.map((field, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={`${getColorClass(field)} field-item`}
+                                                        style={{
+                                                            border: '1px solid black',
+                                                            borderRadius: '40px',
+                                                            padding: '8px',
+                                                            marginRight: '8px',
+                                                            width: 'auto'
+
+                                                        }}
+                                                    >
+                                                        {field}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </Form.Label>
+                                    )}</Info>
 
 
                             </Form.Group>
                         </Form>
                     </Col>
                 </Row>
-                <hr/>
+                <hr />
                 <List>
                     <ButtonGroup>
 
@@ -380,7 +389,7 @@ function MyPagePanel() {
                                             <div className="post-item" onClick={() => openPostModal(post)}>
                                                 <div className="post-title">{post.title}</div>
                                                 {post.imagePath && (
-                                                    <img className="post-image" src={"http://13.124.68.20:8080/" + post.imagePath} />
+                                                    <img className="post-image" src={"http://52.79.53.62:8080/" + post.imagePath} />
                                                 )}
                                                 {!post.imagePath && (
                                                     <div className="post-content">{post.content}</div>

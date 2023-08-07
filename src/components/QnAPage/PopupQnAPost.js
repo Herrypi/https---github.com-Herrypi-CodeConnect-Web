@@ -5,6 +5,9 @@ import Role from '../../userstate/Role';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
+const { localStorage } = window;
+
+
 function PopupQnAPost({ qnapost, onClose }) {
     const [qnaData, setQnaData] = useState(null);
     const [nickname, setNickname] = useState('');
@@ -19,6 +22,14 @@ function PopupQnAPost({ qnapost, onClose }) {
     const [profileImageList, setProfileImageList] = useState([]);
     const [liked, setLiked] = useState(false);
     const [likedCount, setLikedCount] = useState('')
+
+    const accessToken = localStorage.getItem('accessToken');
+
+    const config = {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    };
 
 
     const getColorClass = (field) => {
@@ -44,9 +55,8 @@ function PopupQnAPost({ qnapost, onClose }) {
         }
     };
 
-
     const handleLikeQnaPost = () => {
-        axios.put(`http://13.124.68.20:8080/qna/like/${qnapost.qnaId}`)
+        axios.put(`http://52.79.53.62:8080/qna/like/${qnapost.qnaId}`, config)
             .then((response) => {
                 const liked = response.data.data.liked;
                 const updatedLikeCount = response.data.data.likeCount;
@@ -68,7 +78,7 @@ function PopupQnAPost({ qnapost, onClose }) {
 
     useEffect(() => {
         axios
-            .get(`http://13.124.68.20:8080/qna/detail/${qnapost.qnaId}`)
+            .get(`http://52.79.53.62:8080/qna/detail/${qnapost.qnaId}`, {config})
             .then((response) => {
                 const data = response.data.data;
                 const key1 = Object.keys(data)[0];
@@ -132,9 +142,9 @@ function PopupQnAPost({ qnapost, onClose }) {
         e.preventDefault(); // 폼의 기본 동작을 막습니다.
 
         // 댓글을 작성하는 API로 댓글을 전송합니다.
-        axios.post(`http://13.124.68.20:8080/comment/create/${qnapost.qnaId}`, {
+        axios.post(`http://52.79.53.62:8080/comment/create/${qnapost.qnaId}`, {
             comment,
-        })
+        }, config)
             .then((response) => {
                 // console.log(response.data);
                 setComment('');
@@ -147,7 +157,7 @@ function PopupQnAPost({ qnapost, onClose }) {
     };
 
     const handleDeleteComment = (commentId) => {
-        axios.delete(`http://13.124.68.20:8080/comment/delete/${commentId}`)
+        axios.delete(`http://52.79.53.62:8080/comment/delete/${commentId}`, config)
             .then(response => {
                 // console.log(response.data);
                 // 댓글 삭제 후 새로운 댓글 목록을 가져올 수 있도록 API를 호출하거나, qnaData.commentData 배열에서 삭제된 댓글을 제거할 수 있습니다.
@@ -158,7 +168,7 @@ function PopupQnAPost({ qnapost, onClose }) {
     }
 
     const handleDeleteQnaPost = () => {
-        axios.delete(`http://13.124.68.20:8080/qna/delete/${qnapost.qnaId}`)
+        axios.delete(`http://52.79.53.62:8080/qna/delete/${qnapost.qnaId}`, config)
             .then(response => {
                 onClose();
                 // console.log(response.data);
@@ -188,7 +198,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                     <div className="qna-card-profile">
                                         <img
                                             className="profile-image"
-                                            src={"http://13.124.68.20:8080/" + qnapost.profileImagePath}
+                                            src={"http://52.79.53.62:8080/" + qnapost.profileImagePath}
                                             alt="게시글이미지"
                                         />
                                         <p>{qnaData.nickname}</p>
@@ -198,7 +208,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                         {qnaData.imagePath && ( //게시물 내용에 들어가는 사진
                                             <img
                                                 className="qna-card-image"
-                                                src={"http://13.124.68.20:8080/" + qnaData.imagePath}
+                                                src={"http://52.79.53.62:8080/" + qnaData.imagePath}
                                                 alt="게시글이미지"
                                             />
                                         )}
@@ -231,7 +241,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                         {comment.profileImagePath && (
                                                             <img
                                                                 className="profile-image"
-                                                                src={"http://13.124.68.20:8080/" + comment.profileImagePath}
+                                                                src={"http://52.79.53.62:8080/" + comment.profileImagePath}
                                                                 alt="게시글이미지"
                                                             />
                                                         )}
@@ -244,7 +254,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                         {comment.profileImagePath && (
                                                             <img
                                                                 className="profile-image"
-                                                                src={"http://13.124.68.20:8080/" + comment.profileImagePath}
+                                                                src={"http://52.79.53.62:8080/" + comment.profileImagePath}
                                                                 alt="게시글이미지"
                                                             />
                                                         )}
@@ -285,7 +295,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                     <div className="qna-card-profile">
                                         <img
                                             className="profile-image"
-                                            src={"http://13.124.68.20:8080/" + qnapost.profileImagePath}
+                                            src={"http://52.79.53.62:8080/" + qnapost.profileImagePath}
                                             alt="게시글이미지"
                                         />
                                         <p>{qnaData.nickname}</p>
@@ -294,7 +304,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                     {qnaData.imagePath && (
                                         <img
                                             className="qna-card-image"
-                                            src={"http://13.124.68.20:8080/" + qnaData.imagePath}
+                                            src={"http://52.79.53.62:8080/" + qnaData.imagePath}
                                             alt="게시글이미지"
                                         />
                                     )}
@@ -321,7 +331,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                             {comment.profileImagePath && (
                                                                 <img
                                                                     className="profile-image"
-                                                                    src={"http://13.124.68.20:8080/" + comment.profileImagePath}
+                                                                    src={"http://52.79.53.62:8080/" + comment.profileImagePath}
                                                                     alt="게시글이미지"
                                                                 />
                                                             )}
@@ -336,7 +346,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                             {comment.profileImagePath && (
                                                                 <img
                                                                     className="profile-image"
-                                                                    src={"http://13.124.68.20:8080/" + comment.profileImagePath}
+                                                                    src={"http://52.79.53.62:8080/" + comment.profileImagePath}
                                                                     alt="게시글이미지"
                                                                 />
                                                             )}

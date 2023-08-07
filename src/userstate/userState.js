@@ -11,7 +11,7 @@ export const isLoggedInState = atom({
 });
 
 export const tokenState = atom({
-  key: 'token',
+  key: 'accessToken',
   default: '',
   effects_UNSTABLE: [persistAtom],
 });

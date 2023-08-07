@@ -49,14 +49,14 @@ function PopupPost({ post, onClose }) {
 
 
   const handleParticipate = () => {
-    const token = localStorage.getItem('token');
+    const accessToken = localStorage.getItem('accessToken');
     axios
       .put(
-        `http://13.124.68.20:8080/recruitments/participate/${post.recruitmentId}?isParticipating=true`,
+        `http://52.79.53.62:8080/recruitments/participate/${post.recruitmentId}?isParticipating=true`,
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       )
@@ -75,14 +75,14 @@ function PopupPost({ post, onClose }) {
   };
 
   const handleCancel = () => {
-    const token = localStorage.getItem('token');
+    const accessToken = localStorage.getItem('accessToken');
     axios
       .put(
-        `http://13.124.68.20:8080/recruitments/participate/${post.recruitmentId}?isParticipating=false`,
+        `http://52.79.53.62:8080/recruitments/participate/${post.recruitmentId}?isParticipating=false`,
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       )
@@ -97,7 +97,7 @@ function PopupPost({ post, onClose }) {
 
   const handleDeletePost = () => {
     axios
-      .delete(`http://13.124.68.20:8080/recruitments/delete/${post.recruitmentId}`)
+      .delete(`http://52.79.53.62:8080/recruitments/delete/${post.recruitmentId}`)
       .then((response) => {
         onClose();
         console.log(response.data);
@@ -115,7 +115,7 @@ function PopupPost({ post, onClose }) {
       field: field || popupData.field,
     };
     axios
-      .put(`http://13.124.68.20:8080/recruitments/update/${post.recruitmentId}`, updatedPost)
+      .put(`http://52.79.53.62:8080/recruitments/update/${post.recruitmentId}`, updatedPost)
       .then((response) => {
         setPopupData(response.data);
         console.log(response.data);
@@ -128,7 +128,7 @@ function PopupPost({ post, onClose }) {
 
   useEffect(() => {
     axios
-      .get(`http://13.124.68.20:8080/recruitments/${post.recruitmentId}`)
+      .get(`http://52.79.53.62:8080/recruitments/${post.recruitmentId}`)
       .then((response) => {
         const data = response.data.data;
         const participationData = data[Role.PARTICIPATION];

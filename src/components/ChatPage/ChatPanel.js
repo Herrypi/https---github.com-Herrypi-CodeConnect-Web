@@ -46,7 +46,7 @@ const ChatPanel = ({ roomId, roomTitle }) => {
     // const fileSize = message.message.match(/파일크기:\s(.*?)MB/)[1];
   
     if (message.messageType === "FILE") {
-      const downloadUrl = `http://13.124.68.20:8080/chat/file/download?filePath=${filePath}&fileContentType=${fileContentType}`;
+      const downloadUrl = `http://52.79.53.62:8080/chat/file/download?filePath=${filePath}&fileContentType=${fileContentType}`;
   
       const link = document.createElement("a");
       link.href = downloadUrl;
@@ -70,7 +70,7 @@ const ChatPanel = ({ roomId, roomTitle }) => {
       }
     };
     // Fetch previous chat history
-    axios.get(`http://13.124.68.20:8080/chatRoom/${roomId}`)
+    axios.get(`http://52.79.53.62:8080/chatRoom/${roomId}`)
       .then(response => {
         const data = response.data;
         console.log(data);
@@ -103,7 +103,7 @@ const ChatPanel = ({ roomId, roomTitle }) => {
 
 
     const client = new Client({
-      brokerURL: 'ws://13.124.68.20:8080/ws',
+      brokerURL: 'ws://52.79.53.62:8080/ws',
       debug: function (str) {
         console.log(str);
       },
@@ -175,7 +175,7 @@ const ChatPanel = ({ roomId, roomTitle }) => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://13.124.68.20:8080/chat/file/upload', formData);
+      const response = await axios.post('http://52.79.53.62:8080/chat/file/upload', formData);
       const fileId = response.data.fileId;
       const fileName = response.data.fileName;
       const data = response.data;
@@ -318,7 +318,7 @@ const ChatPanel = ({ roomId, roomTitle }) => {
                     >
                       {message.nickname !== nickname && (
                         <ProfileImage
-                          src={"http://13.124.68.20:8080/" + myProfileImage[message.nickname]}
+                          src={"http://52.79.53.62:8080/" + myProfileImage[message.nickname]}
                           alt="프로필 이미지"
                         />
                       )}

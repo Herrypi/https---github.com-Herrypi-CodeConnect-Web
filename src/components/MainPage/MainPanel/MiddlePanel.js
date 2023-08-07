@@ -85,11 +85,11 @@ function MiddlePanel() {
     // Update the position based on the amount of scrolling
     setPosition(position + event.deltaY);
   }
-  const token = localStorage.getItem('token');
+  const accessToken = localStorage.getItem('accessToken');
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_ADEMD_INFO&key=D3D9E0D0-062C-35F0-A49D-FC9E863B3AD5&format=json&geometry=false&attrFilter=emd_kor_nm:like:${encodeURIComponent(dong)}`);
+      const response = await fetch(`http://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_ADEMD_INFO&key=8E78F586-DBB3-36C9-9FF5-E7B652FBA77D&format=json&geometry=false&attrFilter=emd_kor_nm:like:${encodeURIComponent(dong)}`);
       const data = await response.json();
       if (data && data.response && data.response.result && data.response.result.featureCollection) {
         setResults(data.response.result.featureCollection.features);
@@ -112,11 +112,11 @@ function MiddlePanel() {
       currentCount,
     };
 
-    fetch('http://13.124.68.20:8080/recruitments/create', {
+    fetch('http://52.79.53.62:8080/recruitments/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${accessToken}`
       },
       body: JSON.stringify(newPost)
     })
@@ -128,7 +128,7 @@ function MiddlePanel() {
   };
 
   useEffect(() => {
-    axios.get(`http://13.124.68.20:8080/recruitments/main`)
+    axios.get(`http://52.79.53.62:8080/recruitments/main`)
       .then(response => {
         const data = response.data;
         const recruitmentData = data.data.map(item => {//recruitmentData 안에 게시물 정보 다 저장하기
@@ -146,7 +146,7 @@ function MiddlePanel() {
 
     const addressKeyword = selectedValue === '' ? null : selectedValue;
 
-    axios.get(`http://13.124.68.20:8080/recruitments/main?address=${addressKeyword}`)
+    axios.get(`http://52.79.53.62:8080/recruitments/main?address=${addressKeyword}`)
       .then(response => {
         const data = response.data;
         const recruitmentData = data.data.map(item => {//recruitmentData 안에 게시물 정보 다 저장하기
@@ -164,7 +164,7 @@ function MiddlePanel() {
 
   useEffect(() => {
     if (searchTerm) {
-      axios.get(`http://13.124.68.20:8080/recruitments/search?keyword=${searchTerm}`)
+      axios.get(`http://52.79.53.62:8080/recruitments/search?keyword=${searchTerm}`)
         .then(response => {
           const data = response.data;
           console.log(data)
@@ -273,7 +273,7 @@ function MiddlePanel() {
                   <Post key={item.recruitmentId} onClick={() => handlePostClick(item)}>
                     <li style={{ position: 'relative' }}>
                       <div className="qna-card-profile">
-                        <img className="profile-image" src={"http://13.124.68.20:8080/" + item.profileImagePath} />
+                        <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath} />
                         <p className="nickname">{item.nickname}</p>
                       </div>
                       <h2>{item.title.replace(/\n/g, '\n')}</h2>
@@ -320,7 +320,7 @@ function MiddlePanel() {
                   <Post key={item.recruitmentId} onClick={() => handlePostClick(item)}>
                     <li style={{ position: 'relative' }}>
                       <div className="qna-card-profile">
-                        <img className="profile-image" src={"http://13.124.68.20:8080/" + item.profileImagePath} />
+                        <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath} />
                         <p className="nickname">{item.nickname}</p>
                       </div>
                       <h2>{item.title.replace(/\n/g, '\n')}</h2>
