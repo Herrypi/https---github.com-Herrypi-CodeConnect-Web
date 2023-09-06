@@ -30,6 +30,7 @@ function QnAPanel() {
 
     const config = {
         headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
         }
     };
@@ -70,7 +71,7 @@ function QnAPanel() {
         const keyword = searchText === '' ? null : searchText;
 
 
-        axios.get(`http://52.79.53.62:8080/qna/search/${keyword}`, config)
+        axios.get(`http://52.79.53.62:8080/qna/search/${keyword}`, {config})
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
@@ -93,7 +94,7 @@ function QnAPanel() {
     }
 
     useEffect(() => {
-        axios.get('http://52.79.53.62:8080/qna/list', config)
+        axios.get('http://52.79.53.62:8080/qna/list', {config})
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {

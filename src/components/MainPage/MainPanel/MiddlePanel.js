@@ -38,6 +38,8 @@ function MiddlePanel() {
   const fields = ["안드로이드", "운영체제", "ios", "알고리즘", "서버", "웹", "머신러닝", "데이터베이스", "기타"];
 
 
+
+
   const handleCreate = () => {
     if (title && content && count && selectedField) {
       // Add logic for creating a new post
@@ -87,6 +89,15 @@ function MiddlePanel() {
   }
   const accessToken = localStorage.getItem('accessToken');
 
+  // const config = {
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     'Authorization': `Bearer ${accessToken}`
+  //   }
+  // }
+
+  // console.log(accessToken);
+
   const handleSearch = async () => {
     try {
       const response = await fetch(`http://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_ADEMD_INFO&key=8E78F586-DBB3-36C9-9FF5-E7B652FBA77D&format=json&geometry=false&attrFilter=emd_kor_nm:like:${encodeURIComponent(dong)}`);
@@ -116,7 +127,7 @@ function MiddlePanel() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`
       },
       body: JSON.stringify(newPost)
     })
@@ -128,25 +139,44 @@ function MiddlePanel() {
   };
 
   useEffect(() => {
-    axios.get(`http://52.79.53.62:8080/recruitments/main`)
+    fetch('http://52.79.53.62:8080/recruitments/main', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
       .then(response => {
-        const data = response.data;
-        const recruitmentData = data.data.map(item => {//recruitmentData 안에 게시물 정보 다 저장하기
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const recruitmentData = data.data.map(item => {
           const { recruitmentId, title, profileImagePath, address, nickname, currentDateTime, content, count, field, currentCount } = item;
           return { recruitmentId, title, profileImagePath, address, nickname, currentDateTime, content, count, field, currentCount };
         });
 
-        console.log(data)
+        console.log(data);
         setPostIds(recruitmentData);
         setmyaddress(recruitmentData[0].address);
       })
       .catch(error => console.error(error));
   }, []);
+
+
   useEffect(() => {
 
     const addressKeyword = selectedValue === '' ? null : selectedValue;
 
-    axios.get(`http://52.79.53.62:8080/recruitments/main?address=${addressKeyword}`)
+    axios.get(`http://52.79.53.62:8080/recruitments/main?address=${addressKeyword}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+    )
       .then(response => {
         const data = response.data;
         const recruitmentData = data.data.map(item => {//recruitmentData 안에 게시물 정보 다 저장하기
@@ -164,7 +194,12 @@ function MiddlePanel() {
 
   useEffect(() => {
     if (searchTerm) {
-      axios.get(`http://52.79.53.62:8080/recruitments/search?keyword=${searchTerm}`)
+      axios.get(`http://52.79.53.62:8080/recruitments/search?keyword=${searchTerm}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
         .then(response => {
           const data = response.data;
           console.log(data)
@@ -239,30 +274,30 @@ function MiddlePanel() {
       </Container>
 
       <Container1 style={{ overflowY: 'scroll', height: '75%' }} onWheel={handleWheel}>
-      {showPopupCreat && (
-        <PopupCreat>
-          <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} /><br />
-          <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)} /><br />
-          <input type="text" placeholder="총 인원수를 설정하세요." onChange={(e) => setCount(e.target.value)} /><br />
-          <p>관심분야를 선택하세요:</p>
-          {fields.map((field) => (
-            <label key={field}>
-              <input
-                type="radio"
-                name="field"
-                value={field}
-                checked={selectedField === field}
-                onChange={(e) => setSelectedField(e.target.value)}
-              />
-              {field}
-            </label>
-          ))}
-          <br />
-          <button onClick={() => setShowPopupCreat(false)}>Cancel</button>
-          <button onClick={handleCreate}>Create</button>
-        </PopupCreat>
-      )}
-  
+        {showPopupCreat && (
+          <PopupCreat>
+            <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} /><br />
+            <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)} /><br />
+            <input type="text" placeholder="총 인원수를 설정하세요." onChange={(e) => setCount(e.target.value)} /><br />
+            <p>관심분야를 선택하세요:</p>
+            {fields.map((field) => (
+              <label key={field}>
+                <input
+                  type="radio"
+                  name="field"
+                  value={field}
+                  checked={selectedField === field}
+                  onChange={(e) => setSelectedField(e.target.value)}
+                />
+                {field}
+              </label>
+            ))}
+            <br />
+            <button onClick={() => setShowPopupCreat(false)}>Cancel</button>
+            <button onClick={handleCreate}>Create</button>
+          </PopupCreat>
+        )}
+
 
         <Feed>
           <ul className="list-unstyled">
@@ -273,7 +308,10 @@ function MiddlePanel() {
                   <Post key={item.recruitmentId} onClick={() => handlePostClick(item)}>
                     <li style={{ position: 'relative' }}>
                       <div className="qna-card-profile">
-                        <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath} />
+                        <img
+                          className="profile-image"
+                          src={"http://52.79.53.62:8080/" + item.profileImagePath}
+                        />
                         <p className="nickname">{item.nickname}</p>
                       </div>
                       <h2>{item.title.replace(/\n/g, '\n')}</h2>
@@ -320,7 +358,8 @@ function MiddlePanel() {
                   <Post key={item.recruitmentId} onClick={() => handlePostClick(item)}>
                     <li style={{ position: 'relative' }}>
                       <div className="qna-card-profile">
-                        <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath} />
+                        <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath}
+                        />
                         <p className="nickname">{item.nickname}</p>
                       </div>
                       <h2>{item.title.replace(/\n/g, '\n')}</h2>

@@ -27,6 +27,7 @@ function PopupQnAPost({ qnapost, onClose }) {
 
     const config = {
         headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
         }
     };
@@ -56,7 +57,7 @@ function PopupQnAPost({ qnapost, onClose }) {
     };
 
     const handleLikeQnaPost = () => {
-        axios.put(`http://52.79.53.62:8080/qna/like/${qnapost.qnaId}`, config)
+        axios.put(`http://52.79.53.62:8080/qna/like/${qnapost.qnaId}`, {config})
             .then((response) => {
                 const liked = response.data.data.liked;
                 const updatedLikeCount = response.data.data.likeCount;
@@ -144,7 +145,7 @@ function PopupQnAPost({ qnapost, onClose }) {
         // 댓글을 작성하는 API로 댓글을 전송합니다.
         axios.post(`http://52.79.53.62:8080/comment/create/${qnapost.qnaId}`, {
             comment,
-        }, config)
+        }, {config})
             .then((response) => {
                 // console.log(response.data);
                 setComment('');
@@ -157,7 +158,7 @@ function PopupQnAPost({ qnapost, onClose }) {
     };
 
     const handleDeleteComment = (commentId) => {
-        axios.delete(`http://52.79.53.62:8080/comment/delete/${commentId}`, config)
+        axios.delete(`http://52.79.53.62:8080/comment/delete/${commentId}`, {config})
             .then(response => {
                 // console.log(response.data);
                 // 댓글 삭제 후 새로운 댓글 목록을 가져올 수 있도록 API를 호출하거나, qnaData.commentData 배열에서 삭제된 댓글을 제거할 수 있습니다.
@@ -168,7 +169,7 @@ function PopupQnAPost({ qnapost, onClose }) {
     }
 
     const handleDeleteQnaPost = () => {
-        axios.delete(`http://52.79.53.62:8080/qna/delete/${qnapost.qnaId}`, config)
+        axios.delete(`http://52.79.53.62:8080/qna/delete/${qnapost.qnaId}`, {config})
             .then(response => {
                 onClose();
                 // console.log(response.data);

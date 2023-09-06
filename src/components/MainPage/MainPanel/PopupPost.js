@@ -56,7 +56,7 @@ function PopupPost({ post, onClose }) {
         {},
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${accessToken}`,
           },
         }
       )
@@ -82,7 +82,7 @@ function PopupPost({ post, onClose }) {
         {},
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${accessToken}`,
           },
         }
       )

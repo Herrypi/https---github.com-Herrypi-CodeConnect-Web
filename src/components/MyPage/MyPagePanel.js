@@ -40,7 +40,7 @@ function MyPagePanel() {
         // ...
     });
 
-    
+
 
     const getColorClass = (field) => {
         switch (field) {
@@ -84,9 +84,11 @@ function MyPagePanel() {
     //config는 헤더에 토큰을 추가하는 방법
     const config = {
         headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
         }
     };
+
 
     let currentPosts;
 
@@ -129,34 +131,41 @@ function MyPagePanel() {
     };
 
     useEffect(() => {
-
         axios
+        
             .get(`http://52.79.53.62:8080/profile/myinfo`, {
                 headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                }
             })
             .then((response) => {
                 const data = response.data.data;
                 console.log(data);
-                console.log(accessToken)
+                console.log(accessToken);
                 const infodata = {
                     // email: data.email,
                     nickname: data.nickname,
                     fieldList: data.fieldList,
                     address: data.address,
-                    profileImagePath: data.profileImagePath,
+                    profileImage: data.profileImagePath,
                 };
-                console.log(data.profileImagePath)
+                console.log(data.profileImagePath);
                 setMyInfo(infodata);
                 setNickname(data.nickname);
             })
             .catch((error) => console.error(error));
-    }, [nickname]);
+    }, [accessToken, nickname]);
+
 
     useEffect(() => {
         axios
-            .get(`http://52.79.53.62:8080/profile/userRecruitment/${nickname}`,{config})
+            .get(`http://52.79.53.62:8080/profile/userRecruitment/${nickname}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
             .then((response) => {
                 const data = response.data;
 
@@ -169,29 +178,44 @@ function MyPagePanel() {
 
             })
             .catch((error) => console.error(error));
-    }, [nickname]);
+    }, [accessToken, nickname]);
 
 
     useEffect(() => {
         axios
-            .get(`http://52.79.53.62:8080/profile/userQna/${nickname}`,{config})
+            .get(`http://52.79.53.62:8080/profile/userQna/${nickname}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
             .then((response) => {
                 const data = response.data;
                 console.log(data);
 
-                const myQnaData = data.data.map((item) => {
-                    const { commentCount, content, imagePath, currentDateTime, profileImagePath, qnaId, title } = item;
-                    return { commentCount, content, imagePath, currentDateTime, profileImagePath, qnaId, title, showImgae: true };
-                });
-                setMyQna(myQnaData);
-                console.log(myQnaData);
-
+                if (data && data.data && Array.isArray(data.data)) {
+                    // 데이터가 존재하고 배열인지 확인한 후 처리
+                    const myQnaData = data.data.map((item) => {
+                        const { commentCount, content, imagePath, currentDateTime, profileImagePath, qnaId, title } = item;
+                        return { commentCount, content, imagePath, currentDateTime, profileImagePath, qnaId, title, showImgae: true };
+                    });
+                    setMyQna(myQnaData);
+                    console.log(myQnaData);
+                } else {
+                    console.error('데이터가 없거나 유효하지 않습니다.');
+                }
             })
             .catch((error) => console.error(error));
-    }, [nickname]);
+    }, [accessToken, nickname]);
+
 
     useEffect(() => {
-        axios.get(`http://52.79.53.62:8080/profile/${nickname}`, {config})
+        axios.get(`http://52.79.53.62:8080/profile/${nickname}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
             .then((response) => {
                 const data = response.data;
                 console.log(data);
@@ -201,10 +225,10 @@ function MyPagePanel() {
                     return { address, content, count, currentCount, currentDateTime, field, nickname, profileImagePath, recruitmentId, title };
                 });
                 setMyJoin(joinData);
+            })
+            .catch((error) => console.error(error));
 
-            }).catch((error) => console.error(error));
-
-    }, [nickname]);
+    }, [accessToken, nickname]);
 
 
     function handleWheel(event) {
@@ -247,9 +271,6 @@ function MyPagePanel() {
         }
     };
 
-
-
-
     const saveProfileChanges = () => {
         const selectedFieldList = Object.keys(fieldCheckState).filter(
             (fieldName) => fieldCheckState[fieldName]
@@ -263,7 +284,11 @@ function MyPagePanel() {
         };
 
         axios
-            .put("http://52.79.53.62:8080/profile/update", updateProfile, config)
+            .put("http://52.79.53.62:8080/profile/update", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }, updateProfile)
             .then((response) => {
                 console.log(response.data);
                 console.log(updateProfile);
@@ -287,8 +312,11 @@ function MyPagePanel() {
                         <Profile>
                             <img
                                 className="profile-image"
-                                src={"http://52.79.53.62:8080/" + myInfo.profileImagePath}
+                                src={`http://52.79.53.62:8080/${myInfo.profileImage}`}
                                 alt="Profile"
+                                headers={{
+                                    Authorization: `Bearer ${accessToken}` // 토큰을 Authorization 헤더에 추가
+                                }}
                             />
                             <Button variant="secondary" onClick={openEditProfileModal}>
                                 Edit Profile
@@ -389,7 +417,13 @@ function MyPagePanel() {
                                             <div className="post-item" onClick={() => openPostModal(post)}>
                                                 <div className="post-title">{post.title}</div>
                                                 {post.imagePath && (
-                                                    <img className="post-image" src={"http://52.79.53.62:8080/" + post.imagePath} />
+                                                    <img
+                                                        className="post-image"
+                                                        src={`http://52.79.53.62:8080/${myInfo.profileImage}`}
+                                                        headers={{
+                                                            Authorization: `Bearer ${accessToken}` // 토큰을 Authorization 헤더에 추가
+                                                        }}
+                                                    />
                                                 )}
                                                 {!post.imagePath && (
                                                     <div className="post-content">{post.content}</div>
