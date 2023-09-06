@@ -41,6 +41,9 @@ function MyPagePanel() {
     });
 
 
+    const [imageSrc, setImageSrc] = useState(null);
+
+
 
     const getColorClass = (field) => {
         switch (field) {
@@ -131,32 +134,55 @@ function MyPagePanel() {
     };
 
     useEffect(() => {
-        axios
-        
-            .get(`http://52.79.53.62:8080/profile/myinfo`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${accessToken}`
-                }
-            })
+        axios.get(`http://52.79.53.62:8080/profile/myinfo`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
             .then((response) => {
                 const data = response.data.data;
                 console.log(data);
-                console.log(accessToken);
                 const infodata = {
-                    // email: data.email,
                     nickname: data.nickname,
                     fieldList: data.fieldList,
                     address: data.address,
                     profileImage: data.profileImagePath,
                 };
-                console.log(data.profileImagePath);
+                console.log("http://52.79.53.62:8080/" + data.profileImagePath);
                 setMyInfo(infodata);
                 setNickname(data.nickname);
             })
             .catch((error) => console.error(error));
     }, [accessToken, nickname]);
 
+// -----------------------서버에다가 토큰값을 보내면서 사진을 가져와 띄우는 방법!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    useEffect(() => {
+        const imageUrl = `http://52.79.53.62:8080/${myInfo.profileImage}`;
+        const token = accessToken;
+    
+        // Fetch the image with the token in the headers
+        fetch(imageUrl, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then((blob) => {
+            // Create an object URL from the blob
+            const objectURL = URL.createObjectURL(blob);
+            setImageSrc(objectURL);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }, [accessToken, myInfo.profileImage]);
+// --------------------------------------------------------------------------------------------------------
 
     useEffect(() => {
         axios
@@ -173,7 +199,7 @@ function MyPagePanel() {
                     const { recruitmentId, title, content, count, field, currentCount } = item;
                     return { recruitmentId, title, content, count, field, currentCount, showCurrentCount: true };
                 });
-                console.log(data);
+                console.log(nickname);
                 setMyPosts(myPostData);
 
             })
@@ -209,26 +235,25 @@ function MyPagePanel() {
     }, [accessToken, nickname]);
 
 
-    useEffect(() => {
-        axios.get(`http://52.79.53.62:8080/profile/${nickname}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`
-            }
-        })
-            .then((response) => {
-                const data = response.data;
-                console.log(data);
+    // useEffect(() => {
+    //     axios.get(`http://52.79.53.62:8080/profile/${nickname}`, {
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             Authorization: `Bearer ${accessToken}`
+    //         }
+    //     })
+    //         .then((response) => {
+    //             const data = response.data;
+    //             console.log(data);
 
-                const joinData = data.data.map((item) => {
-                    const { address, content, count, currentCount, currentDateTime, field, nickname, profileImagePath, recruitmentId, title } = item;
-                    return { address, content, count, currentCount, currentDateTime, field, nickname, profileImagePath, recruitmentId, title };
-                });
-                setMyJoin(joinData);
-            })
-            .catch((error) => console.error(error));
+    //             const joinData = data.data.map((item) => {
+    //                 const { address, content, count, currentCount, currentDateTime, field, nickname, profileImagePath, recruitmentId, title } = item;
+    //                 return { address, content, count, currentCount, currentDateTime, field, nickname, profileImagePath, recruitmentId, title };
+    //             });
+    //             setMyJoin(joinData);
+    //         }).catch((error) => console.error(error));
 
-    }, [accessToken, nickname]);
+    // }, [accessToken, nickname]);
 
 
     function handleWheel(event) {
@@ -310,14 +335,19 @@ function MyPagePanel() {
                 <Row >
                     <Col md={4}>
                         <Profile>
-                            <img
+                            {/* <img
                                 className="profile-image"
-                                src={`http://52.79.53.62:8080/${myInfo.profileImage}`}
+                                src={`http://52.79.53.62:8080/${myInfo.profileImage}?token=${accessToken}`}
                                 alt="Profile"
                                 headers={{
                                     Authorization: `Bearer ${accessToken}` // 토큰을 Authorization 헤더에 추가
                                 }}
-                            />
+                            /> */}
+                            {imageSrc ? (
+                                <img src={imageSrc} alt="Profile" className="profile-image"/>
+                            ) : (
+                                <p>Loading image...</p>
+                            )}
                             <Button variant="secondary" onClick={openEditProfileModal}>
                                 Edit Profile
                             </Button>
@@ -419,10 +449,8 @@ function MyPagePanel() {
                                                 {post.imagePath && (
                                                     <img
                                                         className="post-image"
-                                                        src={`http://52.79.53.62:8080/${myInfo.profileImage}`}
-                                                        headers={{
-                                                            Authorization: `Bearer ${accessToken}` // 토큰을 Authorization 헤더에 추가
-                                                        }}
+                                                        src={`http://52.79.53.62:8080/${myInfo.profileImage}?token=${accessToken}`}
+
                                                     />
                                                 )}
                                                 {!post.imagePath && (

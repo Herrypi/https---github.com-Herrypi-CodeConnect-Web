@@ -26,6 +26,8 @@ function QnAPanel() {
 
     const [profileImageList, setProfileImageList] = useState([]);
 
+    const [postImages, setPostImages] = useState([]);
+
     const accessToken = localStorage.getItem('accessToken');
 
     const config = {
@@ -71,7 +73,7 @@ function QnAPanel() {
         const keyword = searchText === '' ? null : searchText;
 
 
-        axios.get(`http://52.79.53.62:8080/qna/search/${keyword}`, {config})
+        axios.get(`http://52.79.53.62:8080/qna/search/${keyword}`, { config })
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
@@ -94,20 +96,74 @@ function QnAPanel() {
     }
 
     useEffect(() => {
-        axios.get('http://52.79.53.62:8080/qna/list', {config})
+        axios.get('http://52.79.53.62:8080/qna/list', { config })
             .then(response => {
                 const data = response.data;
                 const qnaData = data.data.map(item => {
                     const { commentCount, content, imagePath, profileImagePath, likeCount, currentDateTime, modifiedDateTime, nickname, qnaId, title } = item;
+
+                    setPostImages(prevImages => [...prevImages, `http://52.79.53.62:8080/${profileImagePath}`]);
+
                     return { commentCount, content, imagePath, profileImagePath, likeCount, currentDateTime, modifiedDateTime, nickname, qnaId, title };
                 });
                 console.log(data);
                 setqnaIds(qnaData);
                 setImageList(qnaData.map(item => item.imagePath));
                 setProfileImageList(qnaData.map(item => item.profileImagePath));
+
+
             })
             .catch(error => console.error(error));
     }, []);
+
+    useEffect(() => {
+        if (qnaIds.length === 0) {
+            return; // No post data available, exit the useEffect
+        }
+
+        // Create an array to store promises for fetching images
+        const imagePromises = qnaIds.map((post) => {
+            const imageUrl = `http://52.79.53.62:8080/${post.profileImagePath}`;
+            const token = accessToken;
+
+            return fetch(imageUrl, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then((blob) => {
+                    // Create an object URL from the blob
+                    const objectURL = URL.createObjectURL(blob);
+                    return objectURL;
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    return null; // Handle errors by returning null
+                });
+        });
+
+        // Wait for all image fetch promises to resolve
+        Promise.all(imagePromises)
+            .then((imageUrls) => {
+                // Set the image URLs to the respective posts
+                const updatedPostIds = qnaIds.map((post, index) => ({
+                    ...post,
+                    imageUrl: imageUrls[index], // Add the imageUrl property
+                }));
+
+                // Update the state with the updated post data
+                setqnaIds(updatedPostIds);
+            })
+            .catch((error) => {
+                console.error('Error fetching images:', error);
+            });
+    }, [accessToken, qnaIds]);
 
     return (
         <Div>
@@ -177,7 +233,11 @@ function QnAPanel() {
                                         <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
                                             <div className="qna-card-profile">
                                                 {item.profileImagePath && (
-                                                    <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                                    <img
+                                                        className="profile-image"
+                                                        src={item.imageUrl ? item.imageUrl : "fallback-profile-image.jpg"} // Provide a fallback profile image URL
+                                                        alt="Profile"
+                                                    />
                                                 )}
                                                 <p className="nickname">{item.nickname}</p>
                                             </div>
@@ -203,7 +263,11 @@ function QnAPanel() {
                                         <QnAPost key={item.qnaId} onClick={() => handleQnAClick(item)}>
                                             <div className="qna-card-profile">
                                                 {item.profileImagePath && (
-                                                    <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath} alt="프로필 이미지" />
+                                                    <img
+                                                        className="profile-image"
+                                                        src={item.imageUrl ? item.imageUrl : "fallback-profile-image.jpg"} // Provide a fallback profile image URL
+                                                        alt="Profile"
+                                                    />
                                                 )}
                                                 <p className="nickname">{item.nickname}</p>
                                             </div>

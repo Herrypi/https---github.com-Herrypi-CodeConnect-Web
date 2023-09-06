@@ -37,8 +37,7 @@ function MiddlePanel() {
 
   const fields = ["안드로이드", "운영체제", "ios", "알고리즘", "서버", "웹", "머신러닝", "데이터베이스", "기타"];
 
-
-
+  const [postImages, setPostImages] = useState([]);
 
   const handleCreate = () => {
     if (title && content && count && selectedField) {
@@ -155,15 +154,66 @@ function MiddlePanel() {
       .then(data => {
         const recruitmentData = data.data.map(item => {
           const { recruitmentId, title, profileImagePath, address, nickname, currentDateTime, content, count, field, currentCount } = item;
+
+          setPostImages(prevImages => [...prevImages, `http://52.79.53.62:8080/${profileImagePath}`]);
+
           return { recruitmentId, title, profileImagePath, address, nickname, currentDateTime, content, count, field, currentCount };
         });
 
-        console.log(data);
         setPostIds(recruitmentData);
         setmyaddress(recruitmentData[0].address);
       })
       .catch(error => console.error(error));
   }, []);
+
+  useEffect(() => {
+    if (postIds.length === 0) {
+      return; // No post data available, exit the useEffect
+    }
+
+    // Create an array to store promises for fetching images
+    const imagePromises = postIds.map((post) => {
+      const imageUrl = `http://52.79.53.62:8080/${post.profileImagePath}`;
+      const token = accessToken;
+
+      return fetch(imageUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          // Create an object URL from the blob
+          const objectURL = URL.createObjectURL(blob);
+          return objectURL;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          return null; // Handle errors by returning null
+        });
+    });
+
+    // Wait for all image fetch promises to resolve
+    Promise.all(imagePromises)
+      .then((imageUrls) => {
+        // Set the image URLs to the respective posts
+        const updatedPostIds = postIds.map((post, index) => ({
+          ...post,
+          imageUrl: imageUrls[index], // Add the imageUrl property
+        }));
+
+        // Update the state with the updated post data
+        setPostIds(updatedPostIds);
+      })
+      .catch((error) => {
+        console.error('Error fetching images:', error);
+      });
+  }, [accessToken, postIds]);
 
 
   useEffect(() => {
@@ -310,8 +360,10 @@ function MiddlePanel() {
                       <div className="qna-card-profile">
                         <img
                           className="profile-image"
-                          src={"http://52.79.53.62:8080/" + item.profileImagePath}
+                          src={item.imageUrl ? item.imageUrl : "fallback-profile-image.jpg"} // Provide a fallback profile image URL
+                          alt="Profile"
                         />
+
                         <p className="nickname">{item.nickname}</p>
                       </div>
                       <h2>{item.title.replace(/\n/g, '\n')}</h2>
@@ -358,7 +410,12 @@ function MiddlePanel() {
                   <Post key={item.recruitmentId} onClick={() => handlePostClick(item)}>
                     <li style={{ position: 'relative' }}>
                       <div className="qna-card-profile">
-                        <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath}
+                        {/* <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath}
+                        /> */}
+                        <img
+                          className="profile-image"
+                          src={item.imageUrl ? item.imageUrl : "fallback-profile-image.jpg"} // Provide a fallback profile image URL
+                          alt="Profile"
                         />
                         <p className="nickname">{item.nickname}</p>
                       </div>
