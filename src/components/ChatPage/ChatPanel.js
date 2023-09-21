@@ -4,6 +4,8 @@ import { Client } from '@stomp/stompjs';
 import axios from 'axios';
 import ChatRightPanel from './ChatRightPanel';
 
+const { localStorage } = window;
+
 
 const ChatPanel = ({ roomId, roomTitle }) => {
   const [messageList, setMessageList] = useState([]);
@@ -23,6 +25,10 @@ const ChatPanel = ({ roomId, roomTitle }) => {
   const [fileContentType, setFileContentType] = useState("");
   const [filePath, setFilePath] = useState("")
   const [fileSize, setFileSize] = useState("")
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
+
+
+  const accessToken = localStorage.getItem('accessToken');
 
   const toggleChecklist = () => {
     setShowChecklist(!showChecklist);
@@ -44,10 +50,10 @@ const ChatPanel = ({ roomId, roomTitle }) => {
     // const filePath = message.message.match(/파일경로:\s(.*?)\n/)[1];
     // const fileType = message.message.match(/파일타입:\s(.*?)\n/)[1];
     // const fileSize = message.message.match(/파일크기:\s(.*?)MB/)[1];
-  
+
     if (message.messageType === "FILE") {
       const downloadUrl = `http://52.79.53.62:8080/chat/file/download?filePath=${filePath}&fileContentType=${fileContentType}`;
-  
+
       const link = document.createElement("a");
       link.href = downloadUrl;
       link.setAttribute("download", `파일경로: ${filePath}`);
@@ -56,7 +62,212 @@ const ChatPanel = ({ roomId, roomTitle }) => {
       document.body.removeChild(link);
     }
   };
-  
+
+  useEffect(() => {
+    if (!roomId) {
+      return;
+    }
+
+    const scrollToBottom = () => {
+      if (chatContentRef.current) {
+        chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
+      }
+    };
+
+    // Fetch previous chat history
+    axios.get(`http://52.79.53.62:8080/chatRoom/${roomId}`)
+      .then(response => {
+        const data = response.data;
+        console.log(data);
+        setMessageList(data.data.CHAT);
+        setNickname(data.data.MY_NICKNAME);
+        setMyProfileImage(data.data.NICKNAME_IMAGE);
+        setTodoList(data.data.TODO_LIST);
+
+        const profileData = [];
+
+        Object.keys(data.data.NICKNAME_IMAGE).forEach(nickname => {
+          const imagePath = data.data.NICKNAME_IMAGE[nickname];
+          const profile = {
+            nickname: nickname,
+            imagePath: imagePath
+          };
+          profileData.push(profile);
+        });
+
+        setChatPersonList(profileData, () => {
+          console.log(chatPersonList);
+        });
+
+        // 프로필 이미지를 불러오는 부분을 여기에 추가
+        // 이미지를 불러올 대상 목록 (예: myProfileImage)
+        // const imageList = Object.values(data.data.NICKNAME_IMAGE);
+        console.log(chatPersonList);
+
+      })
+      .catch(error => {
+        console.error('Failed to fetch chat history:', error);
+      });
+
+
+
+    const client = new Client({
+      brokerURL: 'ws://52.79.53.62:8080/ws',
+      debug: function (str) {
+        console.log(str);
+      },
+      onConnect: () => {
+        console.log('STOMP 연결 성공');
+        const subscribeCallback = (message) => {
+          const receivedMessage = JSON.parse(message.body);
+          console.log(receivedMessage)
+          // 채팅일 경우
+          if (receivedMessage.type === "chat") {
+            receivedMessage.messageType = "CHAT";
+          } else if (receivedMessage.type === "file") {
+            receivedMessage.messageType = "FILE";
+          }
+
+          // console.log(receivedMessage.messageType);
+          setMessageList(prevList => [...prevList, receivedMessage]);
+          // console.log(prevList => [...prevList, receivedMessage])
+          scrollToBottom();
+
+        };
+        const updateSubscribedTodoList = (message) => {
+          const receivedTodoList = JSON.parse(message.body);
+          setSubscribedTodoList(prevList => [...prevList, receivedTodoList]);
+        };
+        const destination = `/sub/chat/room/${roomId}`;
+        const subscription = client.subscribe(destination, subscribeCallback);
+
+        const todoSubscription = client.subscribe(`/sub/todo/room/${roomId}`, updateSubscribedTodoList);
+
+
+        setStompClient(client);
+      },
+    });
+
+    const connectStompClient = async () => {
+      try {
+        client.activate();
+      } catch (error) {
+        console.error('STOMP 연결 실패:', error);
+      }
+    };
+
+    const initStompClient = async () => {
+      await connectStompClient();
+    };
+
+    initStompClient();
+
+    setShowChecklist(false);
+    setShowPersonList(false);
+
+    return () => {
+      if (stompClient && stompClient.connected) {
+        stompClient.deactivate();
+      }
+    };
+  }, [roomId, accessToken]); // roomId와 accessToken이 업데이트될 때에만 실행
+
+  // --------------------------------------------------------------------------------
+  const fetchProfileImage = () => {
+    if (!accessToken || !myProfileImage) {
+      return;
+    }
+
+    // 프로필 이미지 URL을 가져올 엔드포인트를 지정합니다.
+    console.log(myProfileImage);
+    const profileImageUrlEndpoint = `http://52.79.53.62:8080/${myProfileImage}`;
+
+    fetch(profileImageUrlEndpoint, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        // Blob을 URL로 변환합니다.
+        const objectURL = URL.createObjectURL(blob);
+        setProfileImageUrl(objectURL);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
+
+
+  useEffect(() => {
+    if (myProfileImage && accessToken) {
+      fetchProfileImage();
+    }
+  }, [myProfileImage, accessToken]);
+
+  // --------------------------------------------------------------------------------
+
+
+
+
+
+
+
+  // useEffect(() => {
+  //   if (chatPersonList.length === 0) {
+  //     return; // No post data available, exit the useEffect
+  //   }
+
+  //   // Create an array to store promises for fetching images
+  //   const imagePromises = chatPersonList.map((post) => {
+  //     const imageUrl = `http://52.79.53.62:8080/${post.imagePath}`;
+  //     const token = accessToken;
+
+  //     return fetch(imageUrl, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+  //       .then((response) => {
+  //         if (!response.ok) {
+  //           throw new Error('Network response was not ok');
+  //         }
+  //         return response.blob();
+  //       })
+  //       .then((blob) => {
+  //         // Create an object URL from the blob
+  //         const objectURL = URL.createObjectURL(blob);
+  //         return objectURL;
+  //       })
+  //       .catch((error) => {
+  //         console.error('Error:', error);
+  //         return null; // Handle errors by returning null
+  //       });
+  //   });
+
+  //   // Wait for all image fetch promises to resolve
+  //   Promise.all(imagePromises)
+  //     .then((imageUrls) => {
+  //       // Set the image URLs to the respective posts
+  //       const updatedPostIds = chatPersonList.map((post, index) => ({
+  //         ...post,
+  //         imageUrl: imageUrls[index], // Add the imageUrl property
+  //       }));
+
+  //       // Update the state with the updated post data
+  //       setChatPersonList(updatedPostIds);
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error fetching images:', error);
+  //     });
+  // }, [accessToken, chatPersonList]);
+
+
 
 
   useEffect(() => {
@@ -106,6 +317,7 @@ const ChatPanel = ({ roomId, roomTitle }) => {
       brokerURL: 'ws://52.79.53.62:8080/ws',
       debug: function (str) {
         console.log(str);
+        console.log(chatPersonList);
       },
       onConnect: () => {
         console.log('STOMP 연결 성공');
@@ -318,7 +530,7 @@ const ChatPanel = ({ roomId, roomTitle }) => {
                     >
                       {message.nickname !== nickname && (
                         <ProfileImage
-                          src={"http://52.79.53.62:8080/" + myProfileImage[message.nickname]}
+                          src={profileImageUrl ? profileImageUrl : "fallback-profile-image.jpg"}
                           alt="프로필 이미지"
                         />
                       )}

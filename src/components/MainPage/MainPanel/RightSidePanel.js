@@ -2,10 +2,15 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import PopupQnAPost from '../../QnAPage/PopupQnAPost';
+
+const { localStorage } = window;
+
+
 function RightSidePanel() {
   const [popularPosts, setPopularPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [position, setPosition] = useState(0);
+  const accessToken = localStorage.getItem('accessToken');
 
   function handleWheel(event) {
     // Update the position based on the amount of scrolling
@@ -30,14 +35,63 @@ function RightSidePanel() {
     setSelectedPost(post);
   };
 
+  useEffect(() => {
+    if (popularPosts.length === 0) {
+      return; // No post data available, exit the useEffect
+    }
+
+    // Create an array to store promises for fetching images
+    const imagePromises = popularPosts.map((post) => {
+      const imageUrl = `http://52.79.53.62:8080/${post.profileImagePath}`;
+      const token = accessToken;
+
+      return fetch(imageUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          // Create an object URL from the blob
+          const objectURL = URL.createObjectURL(blob);
+          return objectURL;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          return null; // Handle errors by returning null
+        });
+    });
+
+    // Wait for all image fetch promises to resolve
+    Promise.all(imagePromises)
+      .then((imageUrls) => {
+        // Set the image URLs to the respective posts
+        const updatedPostIds = popularPosts.map((post, index) => ({
+          ...post,
+          imageUrl: imageUrls[index], // Add the imageUrl property
+        }));
+
+        // Update the state with the updated post data
+        setPopularPosts(updatedPostIds);
+      })
+      .catch((error) => {
+        console.error('Error fetching images:', error);
+      });
+  }, [accessToken, popularPosts]);
+
   return (
     <Container>
-      <Headers><img className="heart-icon" src="Images/logos/pinkheart.png"/> 많은 Q&A</Headers>
+      <Headers><img className="heart-icon" src="Images/logos/pinkheart.png" /> 많은 Q&A</Headers>
       <Div onWheel={handleWheel}>
         {popularPosts.map((post) => (
           <PostItem key={post.qnaId} onClick={() => handlePostClick(post)}>
             <div className="qna-card-profile">
-              <img className="profile-image" src={"http://52.79.53.62:8080/" + post.profileImagePath} alt="프로필 이미지" />
+              <img className="profile-image" src={post.imageUrl ? post.imageUrl : "fallback-profile-image.jpg"} alt="프로필 이미지" />
               <p style={{ marginTop: '15px' }} className="nickname">{post.nickname}</p>
             </div>
             <h2 className='qna-card-title'>{post.title}</h2>
