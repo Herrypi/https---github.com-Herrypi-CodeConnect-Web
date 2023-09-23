@@ -4,6 +4,7 @@ import axios from 'axios'
 import Role from '../../userstate/Role';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 
 const { localStorage } = window;
 
@@ -125,14 +126,14 @@ function PopupQnAPost({ qnapost, onClose }) {
                     }));
                     setProfileImageList(profileImageUrls);
                 };
-    
+
                 fetchProfileImages();
 
             })
             .catch((error) => {
                 console.log(error);
             })
-            
+
     }, [qnapost.qnaId]);
 
     useEffect(() => {
@@ -234,7 +235,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                 alt="게시글이미지"
                                             />
                                         )}
-                                        <p>{qnaData.content}</p>
+                                        <div dangerouslySetInnerHTML={{ __html: qnaData.content }} />
                                     </div>
                                 </PostsContainer>
                                 <div className="qna-card-buttons">
@@ -330,7 +331,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                             alt="게시글이미지"
                                         />
                                     )}
-                                    <p>{qnaData.content}</p>
+                                    <div dangerouslySetInnerHTML={{ __html: qnaData.content }} />
                                 </PostsContainer>
                                 <div className="like-count-container">
                                     <img
@@ -424,7 +425,7 @@ const PopupContainer = styled.div`
             top: 50%;
             left: 50%;
             width: 500px;
-            height: 750px;
+            height: 800px;
             transform: translate(-50%, -50%);
             z-index: 9990;
             background-color: white;

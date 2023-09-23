@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { AiOutlinePlusCircle } from 'react-icons/ai';
 import PopupQnAPost from './PopupQnAPost';
 
+
 const { localStorage } = window;
 
 function QnAPanel() {
@@ -37,6 +38,20 @@ function QnAPanel() {
         }
     };
 
+    const markdownText = `
+# 네이버 링크 공유합니다
+
+[Naver](https://naver.com)
+
+## 샾2개 - 리스트
+- 항목 1
+- 항목 2
+- 항목 3
+`;
+
+const htmlText = '<h1>이것은 HTML 헤더입니다</h1><p>이것은 <strong>강조</strong>된 텍스트입니다</p>';
+
+
     const addQnAPost = () => {
         const newQnA = {
             title,
@@ -46,7 +61,7 @@ function QnAPanel() {
 
         fetch('http://52.79.53.62:8080/qna/create', {
             method: 'POST',
-            config,
+            
             body: JSON.stringify(newQnA)
         })
             .then(response => response.json())
@@ -244,7 +259,6 @@ function QnAPanel() {
                                             <li className="qna-post">
                                                 <div className="qna-card">
                                                     <h2 className="qna-card-title">{item.title}</h2>
-                                                    <p className="qna-card-content">내용: {item.content}</p>
                                                     <p className="qna-card-time">시간: {item.currentDateTime}</p>
                                                     <div className="like-count-container">
                                                         <img className="heart-icon" src="Images/logos/heart.png" alt="하트 아이콘" />
@@ -274,8 +288,6 @@ function QnAPanel() {
                                             <li className="qna-post">
                                                 <div className="qna-card">
                                                     <h2 className="qna-card-title">{item.title}</h2>
-
-                                                    <p className="qna-card-content">내용: {item.content}</p>
                                                     <p className="qna-card-time">
                                                         시간: {item.currentDateTime}
                                                     </p>
