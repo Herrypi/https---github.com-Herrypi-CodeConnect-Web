@@ -114,18 +114,29 @@ function PopupQnAPost({ qnapost, onClose }) {
 
                 setQnaData(qnapost);
                 setLiked(qnapost.liked); // 추가된 코드
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+
+
 
                 const fetchProfileImages = async () => {
-                    const profileImageUrls = await Promise.all(qnaData.commentData.map(async (comment) => {
-                        if (comment.profileImagePath) {
-                            const response = await axios.get(`http://52.79.53.62:8080/${comment.profileImagePath}`, { responseType: 'arraybuffer', headers: { 'Authorization': `Bearer ${accessToken}` } });
-                            const base64Image = Buffer.from(response.data, 'binary').toString('base64');
-                            return `data:image/jpeg;base64,${base64Image}`;
-                        }
-                        return null;
-                    }));
-                    setProfileImageList(profileImageUrls);
+                    if (qnaData && qnaData.commentData) { // Check if qnaData.commentData is not null or undefined
+                        const profileImageUrls = await Promise.all(qnaData.commentData.map(async (comment) => {
+                            if (comment.profileImagePath) {
+                                const response = await axios.get(`http://52.79.53.62:8080/${comment.profileImagePath}`, { responseType: 'arraybuffer', headers: { 'Authorization': `Bearer ${accessToken}` } });
+                                const base64Image = Buffer.from(response.data, 'binary').toString('base64');
+                                return `data:image/jpeg;base64,${base64Image}`;
+                            }
+                            return null;
+                        }));
+                        setProfileImageList(profileImageUrls);
+                    } else {
+                        // Handle the case where qnaData.commentData is null or undefined
+                        // You can set a default value or perform other error handling here
+                    }
                 };
+
 
                 fetchProfileImages();
 
@@ -134,7 +145,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                 console.log(error);
             })
 
-    }, [qnapost.qnaId]);
+    }, [qnapost.qnaId, accessToken]);
 
     useEffect(() => {
         if (qnaData) {
