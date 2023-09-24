@@ -4,6 +4,7 @@ import { AiOutlinePlusCircle } from 'react-icons/ai'
 import axios from 'axios';
 import PopupPost from './PopupPost';
 import { BiSearch } from 'react-icons/bi';
+import { display } from '@mui/system';
 
 
 const { localStorage } = window;
@@ -42,7 +43,7 @@ function MiddlePanel() {
   const handleCreate = () => {
     if (title && content && count && selectedField) {
       // Add logic for creating a new post
-      addPost();
+      addPost(selectedField);
       setShowPopupCreat(false);
       setTitle("");
       setContent("");
@@ -112,13 +113,13 @@ function MiddlePanel() {
 
   };
 
-  const addPost = () => {
+  const addPost = (selectedField) => {
     const newPost = {
       nickname,
       title,
       content,
       count,
-      field,
+      field: selectedField,
       currentCount,
     };
 
@@ -214,6 +215,57 @@ function MiddlePanel() {
         console.error('Error fetching images:', error);
       });
   }, [accessToken, postIds]);
+
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    if (searchResults.length === 0) {
+      return; // No post data available, exit the useEffect
+    }
+
+    // Create an array to store promises for fetching images
+    const imagePromises = searchResults.map((post) => {
+      const imageUrl = `http://52.79.53.62:8080/${post.profileImagePath}`;
+      const token = accessToken;
+
+      return fetch(imageUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          // Create an object URL from the blob
+          const objectURL = URL.createObjectURL(blob);
+          return objectURL;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          return null; // Handle errors by returning null
+        });
+    });
+
+    // Wait for all image fetch promises to resolve
+    Promise.all(imagePromises)
+      .then((imageUrls) => {
+        // Set the image URLs to the respective posts
+        const updatedPostIds = searchResults.map((post, index) => ({
+          ...post,
+          imageUrl: imageUrls[index], // Add the imageUrl property
+        }));
+
+        // Update the state with the updated post data
+        setSearchResults(updatedPostIds);
+      })
+      .catch((error) => {
+        console.error('Error fetching images:', error);
+      });
+  }, [accessToken, searchResults]);
+  // ------------------------------------------------------------------
 
 
   useEffect(() => {
@@ -326,25 +378,34 @@ function MiddlePanel() {
       <Container1 style={{ overflowY: 'scroll', height: '75%' }} onWheel={handleWheel}>
         {showPopupCreat && (
           <PopupCreat>
-            <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} /><br />
-            <textarea placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)} /><br />
-            <input type="text" placeholder="총 인원수를 설정하세요." onChange={(e) => setCount(e.target.value)} /><br />
-            <p>관심분야를 선택하세요:</p>
-            {fields.map((field) => (
-              <label key={field}>
-                <input
-                  type="radio"
-                  name="field"
-                  value={field}
-                  checked={selectedField === field}
-                  onChange={(e) => setSelectedField(e.target.value)}
-                />
-                {field}
-              </label>
-            ))}
-            <br />
-            <button onClick={() => setShowPopupCreat(false)}>Cancel</button>
-            <button onClick={handleCreate}>Create</button>
+            <div className='body'>
+              <div className='form-set'>
+                <input type="text" placeholder="제목을 입력하세요." onChange={(e) => setTitle(e.target.value)} />
+
+                <textarea className='text' placeholder="내용을 입력하세요." onChange={(e) => setContent(e.target.value)} />
+
+                <input type="text" placeholder="총 인원수를 설정하세요." onChange={(e) => setCount(e.target.value)} />
+              </div>
+              <div className='interest'>
+                <strong>관심분야를 선택하세요: </strong>
+                {fields.map((field) => (
+                  <label key={field}>
+                    <input className='radio'
+                      type="radio"
+                      name="field"
+                      value={field}
+                      checked={selectedField === field}
+                      onChange={(e) => setSelectedField(e.target.value)}
+                    />
+                    {field}
+                  </label>
+                ))}
+              </div>
+              <div className='btn'>
+                <button className='ok' onClick={handleCreate}>Create</button>
+                <button className='no' onClick={() => setShowPopupCreat(false)}>Cancel</button>
+              </div>
+            </div>
           </PopupCreat>
         )}
 
@@ -394,7 +455,7 @@ function MiddlePanel() {
 
                           }}
                         >
-                          #{item.field}
+                          {item.field}
                         </div>
                       </div>
                     </li>
@@ -410,8 +471,6 @@ function MiddlePanel() {
                   <Post key={item.recruitmentId} onClick={() => handlePostClick(item)}>
                     <li style={{ position: 'relative' }}>
                       <div className="qna-card-profile">
-                        {/* <img className="profile-image" src={"http://52.79.53.62:8080/" + item.profileImagePath}
-                        /> */}
                         <img
                           className="profile-image"
                           src={item.imageUrl ? item.imageUrl : "fallback-profile-image.jpg"} // Provide a fallback profile image URL
@@ -505,20 +564,92 @@ padding-top: 20px;
 
 // display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "fixed", top: 0, bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.5)"
 const PopupCreat = styled.div`
+.body{
 z-index: 9999;
-flexDirection: column;
-alignItems: center;
+flex-direction: column;
+align-items: center;
 justifyContent: center;
+position: fixed;
+width:30%;
+height:auto;
+top: 50%;
+left: 41%;
+transform: translate(0%, -50%);
+background-color: #fff;
+padding: 20px;
+border-radius: 15px;
+box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.body::before {
+  content: "";
   position: fixed;
-  width:700px;
-  height:auto;
-  top: 50%;
-  left: 30%;
-  transform: translate(0%, -50%);
-  background-color: white;
-  padding: 20px;
-  border: 1px solid black;
-  
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* 회색 배경색 및 투명도 설정 */
+  z-index: 9998; /* 팝업 창 뒤에 오도록 z-index 조정 */
+  display: none;
+}
+
+.body.active::before {
+  display: block;
+}
+
+.interest {
+  margin-top: 10px;
+  display:flex;
+  flex-direction: column;
+
+}
+
+.form-set {
+  display:flex;
+  flex-direction:column;
+}
+
+.text {
+  height: 200px;
+  margin-top: 10px;
+  border:none;
+  border-bottom: 1px solid black;
+  resize: none;
+}
+
+input {
+  border: none;
+  margin-top: 10px;
+  border-bottom: 1px solid black
+
+}
+
+button {
+  width: 100%;
+  border-radius: 20px;
+}
+
+.btn {
+  display: flex;
+}
+
+.ok {
+  border: none;
+
+  background-color: #4CAF50;
+}
+
+.no {
+  border: none;
+
+  background-color: red;
+
+}
+
+.radio{
+  margin: 0 auto;
+}
+
 `;
 
 const Post = styled.div`

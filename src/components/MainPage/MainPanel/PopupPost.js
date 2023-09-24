@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import axios from 'axios';
 import Role from '../../../userstate/Role';
 
+const { localStorage } = window;
+
+
 function Dialog({ onClose }) {
   return (
     <DialogContainer>
@@ -23,6 +26,15 @@ function PopupPost({ post, onClose }) {
   const [isParticipating, setIsParticipating] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const accessToken = localStorage.getItem('accessToken');
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`
+    }
+  };
 
   const getColorClass = (field) => {
     switch (field) {
@@ -49,16 +61,9 @@ function PopupPost({ post, onClose }) {
 
 
   const handleParticipate = () => {
-    const accessToken = localStorage.getItem('accessToken');
     axios
       .put(
-        `http://52.79.53.62:8080/recruitments/participate/${post.recruitmentId}?isParticipating=true`,
-        {},
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        }
+        `http://52.79.53.62:8080/recruitments/participate/${post.recruitmentId}?isParticipating=true`, { config }
       )
       .then((response) => {
         setIsParticipating(true);
@@ -75,16 +80,9 @@ function PopupPost({ post, onClose }) {
   };
 
   const handleCancel = () => {
-    const accessToken = localStorage.getItem('accessToken');
     axios
       .put(
-        `http://52.79.53.62:8080/recruitments/participate/${post.recruitmentId}?isParticipating=false`,
-        {},
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        }
+        `http://52.79.53.62:8080/recruitments/participate/${post.recruitmentId}?isParticipating=false`, { config }
       )
       .then((response) => {
         setIsParticipating(false);
@@ -97,7 +95,7 @@ function PopupPost({ post, onClose }) {
 
   const handleDeletePost = () => {
     axios
-      .delete(`http://52.79.53.62:8080/recruitments/delete/${post.recruitmentId}`)
+      .delete(`http://52.79.53.62:8080/recruitments/delete/${post.recruitmentId}`, { config })
       .then((response) => {
         onClose();
         console.log(response.data);
@@ -115,7 +113,7 @@ function PopupPost({ post, onClose }) {
       field: field || popupData.field,
     };
     axios
-      .put(`http://52.79.53.62:8080/recruitments/update/${post.recruitmentId}`, updatedPost)
+      .put(`http://52.79.53.62:8080/recruitments/update/${post.recruitmentId}`, { config }, updatedPost)
       .then((response) => {
         setPopupData(response.data);
         console.log(response.data);
@@ -128,7 +126,7 @@ function PopupPost({ post, onClose }) {
 
   useEffect(() => {
     axios
-      .get(`http://52.79.53.62:8080/recruitments/${post.recruitmentId}`)
+      .get(`http://52.79.53.62:8080/recruitments/${post.recruitmentId}`, { config })
       .then((response) => {
         const data = response.data.data;
         const participationData = data[Role.PARTICIPATION];
@@ -259,7 +257,7 @@ function PopupPost({ post, onClose }) {
 
                     }}
                   >
-                    #{popupData.field}
+                    {popupData.field}
                   </div>
                 </div>
                 {isParticipating && popupData.currentCount < popupData.count ? (
@@ -268,7 +266,7 @@ function PopupPost({ post, onClose }) {
                   isParticipating && popupData.currentCount >= popupData.count ? (
                     <p>참가/취소 불가능</p>
                   ) : (
-                    <ParticipateButton style={{marginLeft:'230px'}} onClick={handleParticipate}>참여하기</ParticipateButton>
+                    <ParticipateButton style={{ marginLeft: '230px' }} onClick={handleParticipate}>참여하기</ParticipateButton>
                   )
                 )}
               </>
@@ -295,12 +293,87 @@ function PopupPost({ post, onClose }) {
                   onChange={(e) => setCount(e.target.value)}
                   placeholder="인원수"
                 />
-                <Input
-                  type="text"
-                  value={field}
-                  onChange={(e) => setField(e.target.value)}
-                  placeholder="관심분야"
-                />
+                <label>
+                  <Input
+                    type="radio"
+                    value="안드로이드"
+                    checked={field === "안드로이드"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  안드로이드
+                </label>
+                <label>
+                  <Input
+                    type="radio"
+                    value="ios"
+                    checked={field === "ios"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  iOS
+                </label>
+                <label>
+                  <Input
+                    type="radio"
+                    value="운영체제"
+                    checked={field === "운영체제"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  운영체제
+                </label>
+                <label>
+                  <Input
+                    type="radio"
+                    value="알고리즘"
+                    checked={field === "알고리즘"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  알고리즘
+                </label>
+                <label>
+                  <Input
+                    type="radio"
+                    value="서버"
+                    checked={field === "서버"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  서버
+                </label>
+                <label>
+                  <Input
+                    type="radio"
+                    value="웹"
+                    checked={field === "웹"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  웹
+                </label>
+                <label>
+                  <Input
+                    type="radio"
+                    value="머신러닝"
+                    checked={field === "머신러닝"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  머신러닝
+                </label>
+                <label>
+                  <Input
+                    type="radio"
+                    value="데이터베이스"
+                    checked={field === "데이터베이스"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  데이터베이스
+                </label>
+                <label>
+                  <Input
+                    type="radio"
+                    value="기타"
+                    checked={field === "기타"}
+                    onChange={(e) => setField(e.target.value)}
+                  />
+                  기타
+                </label>
                 <Button type="submit">저장</Button>
                 <Button type="button" onClick={() => setShowModal(false)}>
                   취소

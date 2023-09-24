@@ -49,7 +49,7 @@ function QnAPanel() {
 - 항목 3
 `;
 
-const htmlText = '<h1>이것은 HTML 헤더입니다</h1><p>이것은 <strong>강조</strong>된 텍스트입니다</p>';
+    const htmlText = '<h1>이것은 HTML 헤더입니다</h1><p>이것은 <strong>강조</strong>된 텍스트입니다</p>';
 
 
     const addQnAPost = () => {
@@ -61,7 +61,7 @@ const htmlText = '<h1>이것은 HTML 헤더입니다</h1><p>이것은 <strong>�
 
         fetch('http://52.79.53.62:8080/qna/create', {
             method: 'POST',
-            
+
             body: JSON.stringify(newQnA)
         })
             .then(response => response.json())
@@ -135,7 +135,7 @@ const htmlText = '<h1>이것은 HTML 헤더입니다</h1><p>이것은 <strong>�
         if (qnaIds.length === 0) {
             return; // No post data available, exit the useEffect
         }
-
+        // console.log(qnaIds)
         // Create an array to store promises for fetching images
         const imagePromises = qnaIds.map((post) => {
             const imageUrl = `http://52.79.53.62:8080/${post.profileImagePath}`;
@@ -200,41 +200,44 @@ const htmlText = '<h1>이것은 HTML 헤더입니다</h1><p>이것은 <strong>�
 
                 {showPopupCreat && (
                     <PopupCreat>
-                        <input
-                            type="text"
-                            placeholder="제목을 입력하세요"
-                            onChange={e => setTitle(e.target.value)}
-                        />
-                        <br />
-                        <textarea
-                            placeholder="내용을 입력하세요."
-                            onChange={e => setContent(e.target.value)}
-                        />
-                        <br />
-                        <input
-                            type="file"
-                            accept=".jpeg"
-                            id="photo_file"
-                            name="photo_file"
-                            onChange={handleImageChange}
-                        />
-                        <br />
-                        <button onClick={() => setShowPopupCreat(false)}>Cancel</button>
-                        <button
-                            onClick={() => {
-                                if (title && content) {
-                                    addQnAPost();
-                                    setShowPopupCreat(false);
-                                    setTitle('');
-                                    setContent('');
-                                    setSelectedImage(null);
-                                } else {
-                                    alert('빈칸을 채워 주세요.');
-                                }
-                            }}
-                        >
-                            Create
-                        </button>
+                        <div className='body'>
+                            <div className='form-set'>
+                                <input
+                                    type="text"
+                                    placeholder="제목을 입력하세요"
+                                    onChange={e => setTitle(e.target.value)}
+                                />
+                                <textarea className='text'
+                                    placeholder="내용을 입력하세요."
+                                    onChange={e => setContent(e.target.value)}
+                                />
+                            </div>
+                            <input
+                                type="file"
+                                accept=".jpeg"
+                                id="photo_file"
+                                name="photo_file"
+                                onChange={handleImageChange}
+                            />
+                            <div className='btn'>
+                            <button className='ok'
+                                onClick={() => {
+                                    if (title && content) {
+                                        addQnAPost();
+                                        setShowPopupCreat(false);
+                                        setTitle('');
+                                        setContent('');
+                                        setSelectedImage(null);
+                                    } else {
+                                        alert('빈칸을 채워 주세요.');
+                                    }
+                                }}
+                            >
+                                Create
+                            </button>
+                            <button className='no' onClick={() => setShowPopupCreat(false)}>Cancel</button>
+                            </div>
+                        </div>
                     </PopupCreat>
                 )}
             </Div1>
@@ -405,21 +408,82 @@ top: 130px;
 
 `;
 const PopupCreat = styled.div`
-z-index: 9999;
-flexDirection: column;
-alignItems: center;
-justifyContent: center;
-  position: fixed;
-  width:700px;
-  height:500px;
-  top: 50%;
-  left: 30%;
-  transform: translate(0%, -50%);
-  background-color: white;
-  padding: 20px;
-  border: 1px solid black;
+.body{
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justifyContent: center;
+    position: fixed;
+    width:30%;
+    height:auto;
+    top: 50%;
+    left: 41%;
+    transform: translate(0%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* 회색 배경색 및 투명도 설정 */
+    z-index: 9998; /* 팝업 창 뒤에 오도록 z-index 조정 */
+    display: none;
+}
+
+.body.active::before {
+    display: block;
+}
+
+.form-set {
+    display:flex;
+    flex-direction:column;
+}
+
+.text {
+    height: 200px;
+    margin-top: 10px;
+    border:none;
+    border-bottom: 1px solid black;
+    resize: none;
+}
+
+input {
+    border: none;
+    margin-top: 10px;
+    border-bottom: 1px solid black
   
+  }
+  
+  button {
+    width: 100%;
+    border-radius: 20px;
+  }
+  
+  .btn {
+    display: flex;
+  }
+  
+  .ok {
+    border: none;
+  
+    background-color: #4CAF50;
+  }
+  
+  .no {
+    border: none;
+  
+    background-color: red;
+  
+  }
 `;
+
 
 const SearchQnAFeed = styled.div`
 display: flex;
