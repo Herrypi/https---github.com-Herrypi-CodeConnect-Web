@@ -101,6 +101,7 @@ function PopupQnAPost({ qnapost, onClose }) {
 
                     return { cocommentCount, comment, profileImagePath, likeCount, liked, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, qnaId, role };
                 }) : [];
+
                 const commentAllData = commentHostData.concat(commentGuestData);
 
                 if (key1 === Role.HOST) {
@@ -110,14 +111,53 @@ function PopupQnAPost({ qnapost, onClose }) {
                 }
 
                 qnapost.commentData = commentAllData;
-                console.log(data);
 
                 setQnaData(qnapost);
                 setLiked(qnapost.liked); // 추가된 코드
-// -----------------------------------------------------------------------------
+                console.log(profileImageList);
+                // ------------------------------------------------------------------------
+                if(commentAllData.length !== 0){
+                    return;
+                }
+                const imagePromises = commentAllData.map((post) => {
+                    const imageUrl = `http://52.79.53.62:8080/${post.profileImagePath}`;
+                    console.log(imageUrl);
+                    const token = accessToken;
 
-// -----------------------------------------------------------------------------
+                    return fetch(imageUrl, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.blob();
+                        })
+                        .then((blob) => {
+                            const objectURL = URL.createObjectURL(blob);
+                            return objectURL;
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            return null;
+                        });
+                });
 
+                Promise.all(imagePromises)
+                    .then((imageUrls) => {
+                        const updateQnaCommetdata = qnapost.commentData.map((post, index) => ({
+                            ...post,
+                            imageUrl: imageUrls[index],
+                        }));
+                        setProfileImageList(updateQnaCommetdata);
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching images:', error);
+                    });
+
+                // ------------------------------------------------------------------------
 
 
                 const fetchProfileImages = async () => {
@@ -146,6 +186,53 @@ function PopupQnAPost({ qnapost, onClose }) {
             })
 
     }, [qnapost.qnaId, accessToken]);
+    // --------------------------------------------------------------------------------
+
+    // useEffect(() => {
+
+
+    //     if (qnaData.commentData.length === 0) {
+    //         return;
+    //     }
+    //     const image_profile = qnaData.commentData.map((comment) => {
+    //         const imageUrl = `http://52.79.53.62:8080/${comment.profileImagePath}`;
+    //         const token = accessToken;
+
+    //         return fetch(imageUrl, {
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`,
+    //             },
+    //         })
+    //             .then((response) => {
+    //                 if (!response.ok) {
+    //                     throw new Error('Network response was not ok');
+    //                 }
+    //                 return response.blob();
+    //             })
+    //             .then((blob) => {
+    //                 // Create an object URL from the blob
+    //                 const objectURL = URL.createObjectURL(blob);
+    //                 return objectURL;
+    //             })
+    //             .catch((error) => {
+    //                 console.error('Error:', error);
+    //                 return null; // Handle errors by returning null
+    //             });
+    //     });
+    //     Promise.all(image_profile)
+    //         .then((imageUrls) => {
+    //             const updateQnaCommetdata = qnaData.commentData.map((post, index) => ({
+    //                 ...post,
+    //                 imageUrl: imageUrls[index],
+    //             }));
+
+    //             setQnaData(updateQnaCommetdata);
+    //         })
+    //         .catch((error) => {
+    //             console.error('Error fetching images:', error);
+    //         });
+    // }, [qnaData, qnapost.qnaId, accessToken])
+    // --------------------------------------------------------------------------------
 
     useEffect(() => {
         if (qnaData) {
@@ -233,7 +320,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                         <img
                                             className="profile-image"
                                             src={"http://52.79.53.62:8080/" + qnapost.profileImagePath}
-                                            alt="게시글이미지"
+                                            alt="프로필이미지"
                                         />
                                         <p>{qnaData.nickname}</p>
                                     </div>
@@ -276,7 +363,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                             <img
                                                                 className="profile-image"
                                                                 src={"http://52.79.53.62:8080/" + comment.profileImagePath}
-                                                                alt="게시글이미지"
+                                                                alt="프로필이미지"
                                                             />
                                                         )}
                                                         {comment.nickname}: {comment.comment}
@@ -289,7 +376,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                             <img
                                                                 className="profile-image"
                                                                 src={"http://52.79.53.62:8080/" + comment.profileImagePath}
-                                                                alt="게시글이미지"
+                                                                alt="프로필이미지"
                                                             />
                                                         )}
                                                         {comment.nickname}: {comment.comment}{" "}
@@ -330,7 +417,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                         <img
                                             className="profile-image"
                                             src={"http://52.79.53.62:8080/" + qnapost.profileImagePath}
-                                            alt="게시글이미지"
+                                            alt="프로필이미지"
                                         />
                                         <p>{qnaData.nickname}</p>
                                     </div>
@@ -366,7 +453,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                                 <img
                                                                     className="profile-image"
                                                                     src={"http://52.79.53.62:8080/" + comment.profileImagePath}
-                                                                    alt="게시글이미지"
+                                                                    alt="프로필이미지"
                                                                 />
                                                             )}
                                                             {comment.nickname}: {comment.comment}
@@ -380,8 +467,8 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                             {comment.profileImagePath && (
                                                                 <img
                                                                     className="profile-image"
-                                                                    src={"http://52.79.53.62:8080/" + comment.profileImagePath}
-                                                                    alt="게시글이미지"
+                                                                    src={comment.imageUrl ? comment.imageUrl : "fallback-profile-image.jpg"}
+                                                                    alt="프로필이미지"
                                                                 />
                                                             )}
                                                             {comment.nickname}: {comment.comment}{" "}
