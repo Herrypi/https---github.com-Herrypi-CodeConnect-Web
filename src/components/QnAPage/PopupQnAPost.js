@@ -86,7 +86,6 @@ function PopupQnAPost({ qnapost, onClose }) {
             .get(`http://52.79.53.62:8080/qna/detail/${qnapost.qnaId}`, { headers: { 'Authorization': `Bearer ${accessToken}` } })
             .then((response) => {
                 const data = response.data.data;
-                // console.log(data);
                 const key1 = Object.keys(data)[0];
                 const gcData = data[Role.COMMENT_GUEST]
 
@@ -102,7 +101,6 @@ function PopupQnAPost({ qnapost, onClose }) {
 
                     return { cocommentCount, comment, profileImagePath, likeCount, liked, imagePath, commentId, currentDateTime, modifiedDateTime, nickname, qnaId, role };
                 }) : [];
-
                 const commentAllData = commentHostData.concat(commentGuestData);
 
                 if (key1 === Role.HOST) {
@@ -115,30 +113,6 @@ function PopupQnAPost({ qnapost, onClose }) {
 
                 setQnaData(qnapost);
                 setLiked(qnapost.liked); // 추가된 코드
-                setAllComment(commentAllData);
-                // console.log(commentAllData);
-                // ------------------------------------------------------------------------
-
-
-                // ------------------------------------------------------------------------
-
-
-                // const fetchProfileImages = async () => {
-                //     if (qnaData && qnaData.commentData) { // Check if qnaData.commentData is not null or undefined
-                //         const profileImageUrls = await Promise.all(qnaData.commentData.map(async (comment) => {
-                //             if (comment.profileImagePath) {
-                //                 const response = await axios.get(`http://52.79.53.62:8080/${comment.profileImagePath}`, { responseType: 'arraybuffer', headers: { 'Authorization': `Bearer ${accessToken}` } });
-                //                 const base64Image = Uint8Array.from(response.data, 'binary').toString('base64');
-                //                 return `data:image/jpeg;base64,${base64Image}`;
-                //             }
-                //             return null;
-                //         }));
-                //         setProfileImageList(profileImageUrls);
-                //     } else {
-                //         // Handle the case where qnaData.commentData is null or undefined
-                //         // You can set a default value or perform other error handling here
-                //     }
-                // };
 
 
                 // fetchProfileImages();
@@ -148,55 +122,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                 console.log(error);
             })
 
-    }, [qnapost.qnaId, accessToken, allcommet]);
-    // --------------------------------------------------------------------------------
-
-    // useEffect(() => {
-
-
-    //     if (allcommet.length !== 0) {
-    //         return;
-    //     }
-    //     const imagePromises = allcommet.map((post) => {
-    //         const imageUrl = `http://52.79.53.62:8080/${post.profileImagePath}`;
-    //         // console.log(imageUrl);
-    //         const token = accessToken;
-
-    //         return fetch(imageUrl, {
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //             },
-    //         })
-    //             .then((response) => {
-    //                 if (!response.ok) {
-    //                     throw new Error('Network response was not ok');
-    //                 }
-    //                 return response.blob();
-    //             })
-    //             .then((blob) => {
-    //                 const objectURL = URL.createObjectURL(blob);
-    //                 console.log(objectURL);
-    //                 return objectURL;
-    //             })
-    //             .catch((error) => {
-    //                 console.error('Error:', error);
-    //                 return null;
-    //             });
-    //     });
-
-    //     Promise.all(imagePromises)
-    //         .then((imageUrls) => {
-    //             const updateQnaCommetdata = allcommet.map((post, index) => ({
-    //                 ...post,
-    //                 imageUrl: imageUrls[index],
-    //             }));
-    //             setAllComment(updateQnaCommetdata);
-    //         })
-    //         .catch((error) => {
-    //             console.error('Error fetching images:', error);
-    //         });
-    // }, [qnaData, qnapost.qnaId, accessToken])
-    // --------------------------------------------------------------------------------
+    }, [qnapost.qnaId]);
 
     useEffect(() => {
         if (qnaData) {
@@ -285,7 +211,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                         <img
                                             className="profile-image"
                                             src={"http://52.79.53.62:8080/" + qnapost.profileImagePath}
-                                            alt="프로필이미지"
+                                            alt="게시글이미지"
                                         />
                                         <p>{qnaData.nickname}</p>
                                     </div>
@@ -328,7 +254,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                             <img
                                                                 className="profile-image"
                                                                 src={"http://52.79.53.62:8080/" + comment.profileImagePath}
-                                                                alt="프로필이미지"
+                                                                alt="게시글이미지"
                                                             />
                                                         )}
                                                         {comment.nickname}: {comment.comment}
@@ -341,7 +267,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                                             <img
                                                                 className="profile-image"
                                                                 src={"http://52.79.53.62:8080/" + comment.profileImagePath}
-                                                                alt="프로필이미지"
+                                                                alt="게시글이미지"
                                                             />
                                                         )}
                                                         {comment.nickname}: {comment.comment}{" "}
@@ -382,7 +308,7 @@ function PopupQnAPost({ qnapost, onClose }) {
                                         <img
                                             className="profile-image"
                                             src={"http://52.79.53.62:8080/" + qnapost.profileImagePath}
-                                            alt="프로필이미지"
+                                            alt="게시글이미지"
                                         />
                                         <p>{qnaData.nickname}</p>
                                     </div>

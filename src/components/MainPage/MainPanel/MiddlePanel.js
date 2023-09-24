@@ -163,6 +163,8 @@ function MiddlePanel() {
 
         setPostIds(recruitmentData);
         setmyaddress(recruitmentData[0].address);
+        console.log(recruitmentData);
+
       })
       .catch(error => console.error(error));
   }, []);
